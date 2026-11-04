@@ -2,7 +2,7 @@
 
 한국어(이 페이지) · English: [README.en.md](README.en.md)
 
-제작·유지보수: [Nerdvana Inc.](https://www.nerdvana.co.kr) (㈜너드바나) · 라이선스 MIT · [고지](NOTICE.md)
+제작·유지보수: [Nerdvana Inc.](https://nerdvana.co.kr) (㈜너드바나) · 라이선스 MIT · [고지](NOTICE.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://github.com/nerdvanainc/com-port-widget/actions/workflows/tests.yml/badge.svg)](https://github.com/nerdvanainc/com-port-widget/actions/workflows/tests.yml)
@@ -144,4 +144,4 @@ MIT. [LICENSE](LICENSE) 참조. exe에 포함된 서드파티 구성 요소는 [
 
 ## 회사 소개
 
-[Nerdvana Inc.](https://www.nerdvana.co.kr)(㈜너드바나)는 임베디드 하드웨어, 펌웨어, 소프트웨어를 개발합니다. 소개 페이지: [nerdvana.co.kr/com-port-widget](https://nerdvana.co.kr/com-port-widget/)
+[Nerdvana Inc.](https://nerdvana.co.kr)(㈜너드바나)는 임베디드 하드웨어, 펌웨어, 소프트웨어를 개발합니다. 소개 페이지: [nerdvana.co.kr/com-port-widget](https://nerdvana.co.kr/com-port-widget/)

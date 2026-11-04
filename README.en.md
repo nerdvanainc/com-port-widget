@@ -2,7 +2,7 @@
 
 한국어: [README.md](README.md) · English (this page)
 
-Made and maintained by [Nerdvana Inc.](https://www.nerdvana.co.kr) · MIT license · [Notice](NOTICE.en.md)
+Made and maintained by [Nerdvana Inc.](https://nerdvana.co.kr) · MIT license · [Notice](NOTICE.en.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Tests](https://github.com/nerdvanainc/com-port-widget/actions/workflows/tests.yml/badge.svg)](https://github.com/nerdvanainc/com-port-widget/actions/workflows/tests.yml)
@@ -144,4 +144,4 @@ MIT. See [LICENSE](LICENSE). Third-party components in the exe are listed in [TH
 
 ## About the company
 
-[Nerdvana Inc.](https://www.nerdvana.co.kr) develops embedded hardware, firmware and software. Product page: [nerdvana.co.kr/com-port-widget](https://nerdvana.co.kr/com-port-widget/)
+[Nerdvana Inc.](https://nerdvana.co.kr) develops embedded hardware, firmware and software. Product page: [nerdvana.co.kr/com-port-widget](https://nerdvana.co.kr/com-port-widget/)

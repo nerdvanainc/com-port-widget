@@ -2,9 +2,9 @@
 
 한국어: [NOTICE.md](NOTICE.md) · English (this page)
 
-Made and maintained by: © 2026 Nerdvana Inc., https://www.nerdvana.co.kr
+Made and maintained by: © 2026 Nerdvana Inc., https://nerdvana.co.kr
 
-This page collects notices about scope of use, responsibility and trademarks. The license itself is [LICENSE](LICENSE) (MIT). "COM Port Widget" is a temporary product name and may change.
+This page collects notices about scope of use, responsibility and trademarks. The license itself is [LICENSE](LICENSE) (MIT).
 
 ## No warranty
 

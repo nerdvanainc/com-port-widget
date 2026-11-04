@@ -2,9 +2,9 @@
 
 한국어(이 문서) · English: [NOTICE.en.md](NOTICE.en.md)
 
-제작·유지보수: © 2026 Nerdvana Inc. (㈜너드바나), https://www.nerdvana.co.kr
+제작·유지보수: © 2026 Nerdvana Inc. (㈜너드바나), https://nerdvana.co.kr
 
-사용 범위, 책임, 상표에 관한 고지를 모은 문서입니다. 라이선스 본문은 [LICENSE](LICENSE)(MIT)입니다. 제품 이름 "COM Port Widget"은 임시 이름이며 바뀔 수 있습니다.
+사용 범위, 책임, 상표에 관한 고지를 모은 문서입니다. 라이선스 본문은 [LICENSE](LICENSE)(MIT)입니다.
 
 ## 보증 없음
 
