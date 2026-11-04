@@ -140,7 +140,7 @@ pwsh packaging/make_release.ps1 -Version 0.1.0   # dist/ 아래에 zip과 SHA256
 
 ## 라이선스
 
-MIT. [LICENSE](LICENSE) 참조. exe에 포함된 서드파티 구성 요소는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 정리했습니다. 변경 내역은 [CHANGELOG.md](CHANGELOG.md)에 있습니다.
+소스 코드는 MIT입니다. [LICENSE](LICENSE) 참조. 릴리스 exe에 포함된 .NET 런타임 일부는 Microsoft 약관을 따르며, 파일별 구분은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있습니다. 변경 내역은 [CHANGELOG.md](CHANGELOG.md)에 있습니다.
 
 ## 회사 소개
 

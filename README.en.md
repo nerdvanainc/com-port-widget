@@ -140,7 +140,7 @@ The unit tests use xUnit and cover device identification, list order and highlig
 
 ## License
 
-MIT. See [LICENSE](LICENSE). Third-party components in the exe are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Changes are in [CHANGELOG.en.md](CHANGELOG.en.md).
+The source code is under the MIT license. See [LICENSE](LICENSE). Parts of the .NET runtime bundled in the release exe are under Microsoft terms; the split by file is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Changes are in [CHANGELOG.en.md](CHANGELOG.en.md).
 
 ## About the company
 

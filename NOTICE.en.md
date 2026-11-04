@@ -33,7 +33,7 @@ If the PC is already infected, the limits above are a reason not to use this fea
 
 ## Network and data
 
-- The program does not use the network. There is no telemetry, update check or error reporting, and the app's own code makes no network calls. (The .NET runtime bundled in the exe includes libraries such as `System.Net`, which the app does not use.)
+- The program does not use the network. There is no telemetry, update check or error reporting, and the app's own code makes no network calls. (The .NET runtime bundled in the exe includes libraries such as `System.Net`, which the app does not use.) If the program crashes, Windows Error Reporting may send a report to Microsoft depending on your Windows settings, and the .NET runtime adds information to that report. This is a Windows feature, not part of the app.
 - Notes, observed connect and disconnect times, and settings are stored only in `%APPDATA%\ComPortWidget\data.json`. Nothing is synchronised to another PC. On an unhandled error the exception text is appended to `crash.log` in the same folder; it is never sent anywhere.
 - If you turn on starting with Windows, one value is written under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 - The program never opens a COM port. Device information is read from the registry and the device management APIs.
@@ -47,6 +47,12 @@ The executable is not code-signed. SmartScreen may warn on the first run, and th
 This software is not affiliated with, sponsored by or endorsed by the companies or products below. The names appear only to describe devices. The vendor name in the list is the chip maker that corresponds to the VID (vendor number) the USB device reports. It can differ from the company that built the device.
 
 FTDI is a trademark of Future Technology Devices International Ltd. Silicon Labs is a trademark of Silicon Laboratories Inc. Espressif is a trademark of Espressif Systems. WCH is a trademark of Nanjing Qinheng Microelectronics Co., Ltd. Adafruit is a trademark of Adafruit Industries. STMicroelectronics is a trademark of STMicroelectronics. Prolific is a trademark of Prolific Technology Inc. Arduino is a trademark of Arduino S.r.l. SEGGER is a trademark of SEGGER Microcontroller GmbH. Arm is a trademark of Arm Limited. Microsoft, Windows and PowerShell are trademarks of Microsoft Corporation. Other names are trademarks of their owners.
+
+## Microsoft components in the executable
+
+The source code of this program is under the MIT license. `ComPortWidget.exe` in the release zip also contains the .NET runtime, and parts of it are under the Microsoft .NET Library License and the Windows SDK License, not MIT. The split by file is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+By using or redistributing this executable, you agree to those terms for those components. You may not distribute them separately from the program or reverse engineer them.
 
 ## Third-party components
 

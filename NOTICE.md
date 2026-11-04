@@ -33,7 +33,7 @@ PC가 이미 악성코드에 감염되어 있다면, 위 한계 때문에 이 �
 
 ## 네트워크와 데이터
 
-- 이 프로그램은 네트워크를 쓰지 않습니다. 텔레메트리, 업데이트 확인, 오류 보고가 없고, 이 앱의 코드는 네트워크 호출을 하지 않습니다. (.NET 런타임에는 `System.Net` 같은 네트워크 라이브러리가 들어 있지만 앱이 사용하지 않습니다.)
+- 이 프로그램은 네트워크를 쓰지 않습니다. 텔레메트리, 업데이트 확인, 오류 보고가 없고, 이 앱의 코드는 네트워크 호출을 하지 않습니다. (.NET 런타임에는 `System.Net` 같은 네트워크 라이브러리가 들어 있지만 앱이 사용하지 않습니다.) 다만 프로그램이 비정상 종료하면 Windows 오류 보고가 설정에 따라 Microsoft로 보고서를 보낼 수 있고, .NET 런타임이 그 보고서에 정보를 추가합니다. 이것은 앱이 아니라 Windows의 기능입니다.
 - 메모, 직접 관측한 연결·해제 시각, 설정은 `%APPDATA%\ComPortWidget\data.json`에만 저장됩니다. 다른 PC로 동기화되지 않습니다. 처리되지 않은 오류가 나면 예외 내용을 같은 폴더의 `crash.log`에 덧붙이며, 어디에도 보내지 않습니다.
 - Windows 시작 시 자동 실행을 켜면 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`에 값을 하나 씁니다.
 - COM 포트를 열지 않습니다. 장치 정보는 레지스트리와 장치 관리 API에서 읽습니다.
@@ -47,6 +47,12 @@ PC가 이미 악성코드에 감염되어 있다면, 위 한계 때문에 이 �
 이 소프트웨어는 아래 회사나 제품과 제휴, 후원, 보증 관계가 없습니다. 이름은 장치를 설명하는 용도로만 나옵니다. 목록에 나오는 제조사 이름은 USB 장치가 알리는 VID(제조사 번호)에 대응하는 칩 제조사이며, 장비를 실제로 만든 회사와 다를 수 있습니다.
 
 FTDI는 Future Technology Devices International Ltd.의 상표입니다. Silicon Labs는 Silicon Laboratories Inc.의 상표입니다. Espressif는 Espressif Systems의 상표입니다. WCH는 Nanjing Qinheng Microelectronics Co., Ltd.의 상표입니다. Adafruit는 Adafruit Industries의 상표입니다. STMicroelectronics는 STMicroelectronics의 상표입니다. Prolific은 Prolific Technology Inc.의 상표입니다. Arduino는 Arduino S.r.l.의 상표입니다. SEGGER는 SEGGER Microcontroller GmbH의 상표입니다. Arm은 Arm Limited의 상표입니다. Microsoft, Windows, PowerShell은 Microsoft Corporation의 상표입니다. 그 밖의 이름은 각 소유자의 상표입니다.
+
+## 실행 파일에 포함된 Microsoft 구성 요소
+
+이 프로그램의 소스 코드는 MIT 라이선스입니다. 릴리스 zip의 `ComPortWidget.exe`에는 .NET 런타임이 함께 들어 있고, 그중 일부는 MIT가 아니라 Microsoft .NET Library License와 Windows SDK License를 따릅니다. 파일별 구분은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있습니다.
+
+이 실행 파일을 사용하거나 다시 배포하면 해당 구성 요소에 대해 위 약관을 따르는 데 동의하는 것입니다. 이 구성 요소를 프로그램과 분리해 따로 배포할 수 없고, 역설계할 수 없습니다.
 
 ## 서드파티 구성 요소
 

@@ -6,11 +6,20 @@
 
 `ComPortWidget.exe` is a self-contained single file. Besides the app code it contains:
 
-| 구성 요소 / Component | 라이선스 / License | 출처 / Source |
-|---|---|---|
-| .NET 런타임과 기본 클래스 라이브러리 / .NET Runtime and base class libraries | MIT | https://github.com/dotnet/runtime |
-| WPF (Windows Presentation Foundation) | MIT | https://github.com/dotnet/wpf |
-| Windows Forms (트레이 아이콘 `NotifyIcon`과 `DeviceWatcher`의 타이머에 사용 / used for the tray icon `NotifyIcon` and the timers in `DeviceWatcher`) | MIT | https://github.com/dotnet/winforms |
+| 구성 요소 / Component | 약관 / Terms |
+|---|---|
+| `coreclr.dll`을 포함해 단일 파일 exe에 들어 있는 .NET 런타임 / The .NET runtime inside the single-file exe, including `coreclr.dll` | Microsoft .NET Library License: https://dotnet.microsoft.com/dotnet_library_license.htm |
+| `PresentationNative_cor3.dll`, `wpfgfx_cor3.dll`, `vcruntime140_cor3.dll` (WPF) | Microsoft .NET Library License |
+| `D3DCompiler_47_cor3.dll` (WPF) | Windows SDK License: https://learn.microsoft.com/legal/windows-sdk/license |
+| 그 밖의 .NET, WPF, Windows Forms 파일 / All other .NET, WPF and Windows Forms files | MIT |
+
+파일별 구분은 Microsoft의 안내를 따랐습니다: https://github.com/dotnet/core/blob/main/license-information-windows.md
+
+The split above follows Microsoft's guidance at the link above.
+
+이 표는 릴리스 zip의 실행 파일에 적용됩니다. 이 저장소의 소스 코드에는 위 파일이 들어 있지 않습니다.
+
+This table applies to the executable in the release zip. The source code in this repository does not contain these files.
 
 .NET 런타임은 자체 서드파티 구성 요소(압축 라이브러리 등)를 포함하며, 그 고지는 .NET 저장소의 `THIRD-PARTY-NOTICES.TXT`에 있습니다: https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT
 
