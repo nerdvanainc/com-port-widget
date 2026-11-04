@@ -1,0 +1,73 @@
+<Window x:Class="ComPortWidget.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings" Width="440" Height="560" MinWidth="380" MinHeight="420"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI, Malgun Gothic" FontSize="13">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <CheckBox x:Name="AlwaysOnTopBox" Click="AlwaysOnTop_Click" Margin="0,0,0,12"/>
+
+        <TextBlock x:Name="HighlightLabel" Grid.Row="1"/>
+        <TextBox x:Name="HighlightBox" Grid.Row="2" Width="80" HorizontalAlignment="Left" Margin="0,4,0,12"
+                 MaxLength="4" KeyDown="Highlight_KeyDown" LostFocus="Highlight_LostFocus"/>
+
+        <TextBlock x:Name="LanguageLabel" Grid.Row="3"/>
+        <ComboBox x:Name="LanguageBox" Grid.Row="4" Margin="0,4,0,12" SelectionChanged="Language_Changed"/>
+
+        <StackPanel Grid.Row="5">
+            <CheckBox x:Name="AutoStartBox" Click="AutoStart_Click"/>
+            <TextBlock x:Name="AutoStartError" Foreground="#C0392B" TextWrapping="Wrap" Margin="0,4,0,0"
+                       Visibility="Collapsed"/>
+            <TextBlock x:Name="HotkeyLabel" Margin="0,12,0,0"/>
+            <TextBox x:Name="HotkeyBox" Margin="0,4,0,0" KeyDown="Hotkey_KeyDown" LostFocus="Hotkey_LostFocus"/>
+            <TextBlock x:Name="HotkeyError" Foreground="#C0392B" TextWrapping="Wrap" Margin="0,4,0,0"
+                       Visibility="Collapsed"/>
+        </StackPanel>
+
+        <TextBlock x:Name="MemosLabel" Grid.Row="6" FontWeight="SemiBold" Margin="0,16,0,4"/>
+
+        <Grid Grid.Row="7">
+            <ListBox x:Name="MemoList" HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Memo}" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Key}" FontSize="11" Foreground="#6B7480"
+                                           TextTrimming="CharacterEllipsis" ToolTip="{Binding Key}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="{Binding DataContext.DeleteText, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Tag="{Binding}" Click="DeleteMemo_Click" Margin="8,0,0,0" Padding="8,2"
+                                    VerticalAlignment="Center"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <TextBlock x:Name="MemosEmpty" Foreground="#6B7480" HorizontalAlignment="Center"
+                       VerticalAlignment="Center" Visibility="Collapsed"/>
+        </Grid>
+
+        <Button x:Name="ResetButton" Grid.Row="8" HorizontalAlignment="Left" Margin="0,8,0,0" Padding="12,4"
+                Click="Reset_Click" AutomationProperties.AutomationId="ResetButton"/>
+
+        <TextBlock x:Name="Note" Grid.Row="9" Foreground="#6B7480" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
+    </Grid>
+</Window>

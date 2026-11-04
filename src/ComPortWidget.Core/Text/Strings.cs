@@ -1,0 +1,140 @@
+using System.Globalization;
+
+namespace ComPortWidget.Core.Text;
+
+/// <summary>화면 문구 표. 언어는 "ko" 또는 "en"이다. 이후 작업에서 필요한 키를 추가한다.</summary>
+public static class Strings
+{
+    private static readonly Dictionary<string, (string Ko, string En)> Table = new()
+    {
+        ["time.just_now"] = ("방금 전", "just now"),
+        ["time.minutes_ago"] = ("{0}분 전", "{0} min ago"),
+        ["time.today"] = ("오늘 {0}", "today {0}"),
+        ["time.yesterday"] = ("어제 {0}", "yesterday {0}"),
+        ["time.unknown"] = ("시간 없음", "no time"),
+        ["time.boot"] = ("부팅 시 인식", "at boot"),
+        ["time.removed"] = ("뽑힘 {0}", "removed {0}"),
+        ["time.last_seen"] = ("마지막 인식 {0}", "last seen {0}"),
+        ["app.name"] = ("COM 포트 위젯", "COM Port Widget"),
+        ["widget.header"] = ("COM 포트 · 연결 {0}", "COM ports · {0} connected"),
+        ["widget.disconnected"] = ("연결 안 됨 ({0})", "Not connected ({0})"),
+        ["widget.empty"] = ("연결된 COM 포트가 없습니다", "No COM ports connected"),
+        ["widget.new"] = ("NEW", "NEW"),
+        ["widget.add_memo"] = ("메모 추가…", "Add note…"),
+        ["widget.settings"] = ("설정", "Settings"),
+        ["widget.hide"] = ("숨기기", "Hide"),
+        ["widget.status.scan_failed"] = ("조회 실패", "Scan failed"),
+        ["widget.status.save_failed"] = ("저장 안 됨", "Not saved"),
+        ["widget.status.hotkey_failed"] = ("단축키 사용 중", "Hotkey in use"),
+        ["widget.status.autostart_failed"] = ("자동 실행 등록 실패", "Auto-start failed"),
+        ["widget.status.data_recovered"] = ("저장 파일이 손상되어 메모가 없을 수 있음 (.corrupt 사본 보관)", "Data file was damaged; notes may be missing (.corrupt copy kept)"),
+        ["menu.copy_port"] = ("포트 이름 복사", "Copy port name"),
+        ["menu.edit_memo"] = ("메모 편집", "Edit note"),
+        ["menu.device_info"] = ("장치 정보 보기", "Device info"),
+        ["info.port"] = ("포트", "Port"),
+        ["info.state"] = ("상태", "State"),
+        ["info.connected"] = ("연결됨", "Connected"),
+        ["info.not_connected"] = ("연결 안 됨", "Not connected"),
+        ["info.vendor"] = ("제조사", "Vendor"),
+        ["info.description"] = ("장치 설명", "Description"),
+        ["info.instance_id"] = ("인스턴스 ID", "Instance ID"),
+        ["info.key"] = ("장비 키", "Device key"),
+        ["info.arrival"] = ("Windows 인식 시각", "Windows arrival time"),
+        ["info.removal"] = ("Windows 해제 시각", "Windows removal time"),
+        ["info.none"] = ("없음", "none"),
+        ["settings.title"] = ("설정", "Settings"),
+        ["settings.always_on_top"] = ("항상 맨 위", "Always on top"),
+        ["settings.highlight"] = ("하이라이트 시간 (분, 1~120)", "Highlight time (minutes, 1-120)"),
+        ["settings.language"] = ("언어", "Language"),
+        ["settings.language.auto"] = ("자동 (Windows 표시 언어)", "Auto (Windows display language)"),
+        ["settings.language.ko"] = ("한국어", "한국어"),
+        ["settings.language.en"] = ("English", "English"),
+        ["settings.autostart"] = ("Windows 시작 시 실행", "Run when Windows starts"),
+        ["settings.autostart_error"] = ("자동 실행 설정을 바꾸지 못했습니다.", "Could not change the auto-start setting."),
+        ["settings.hotkey"] = ("전역 단축키 (예: Ctrl+Alt+Shift+C)", "Global hotkey (e.g. Ctrl+Alt+Shift+C)"),
+        ["settings.hotkey_invalid"] = ("단축키 형식이 올바르지 않습니다. 한정자(Ctrl, Alt, Shift, Win) 하나 이상과 키 하나가 필요합니다.", "Invalid hotkey. Use at least one modifier (Ctrl, Alt, Shift, Win) and one key."),
+        ["settings.hotkey_conflict"] = ("다른 프로그램이 이 단축키를 쓰고 있어 등록하지 못했습니다.", "Another program already uses this hotkey, so it was not registered."),
+        ["settings.hotkey_restore_failed"] = ("새 단축키를 등록하지 못했고 이전 단축키도 다시 등록하지 못했습니다. 지금은 단축키가 동작하지 않습니다.", "The new hotkey could not be registered and the previous one could not be restored. The hotkey is not active now."),
+        ["settings.memos"] = ("저장된 메모", "Saved notes"),
+        ["settings.memos_empty"] = ("저장된 메모가 없습니다", "No saved notes"),
+        ["settings.delete"] = ("삭제", "Delete"),
+        ["settings.demo_note"] = ("데모 모드: 변경 내용을 파일에 저장하지 않습니다.", "Demo mode: changes are not saved to disk."),
+        ["tray.show"] = ("위젯 보기", "Show widget"),
+        ["tray.reset"] = ("COM 포트 정리", "Clean up COM ports"),
+        ["tray.settings"] = ("설정", "Settings"),
+        ["tray.exit"] = ("종료", "Exit"),
+        ["autostart.prompt"] = ("Windows를 시작할 때 COM 포트 위젯을 자동으로 실행할까요?\n설정에서 나중에 바꿀 수 있습니다.", "Start COM Port Widget automatically when Windows starts?\nYou can change this later in Settings."),
+        ["reset.abortReadState"] = ("현재 상태를 읽지 못해 아무것도 바꾸지 않았습니다.", "Could not read the current state; nothing was changed."),
+        ["reset.abortBackupFailed"] = ("백업을 쓰지 못해 아무것도 바꾸지 않았습니다.", "Could not write the backup; nothing was changed."),
+        ["reset.abortPresent"] = ("삭제 직전 연결된 장치가 확인되어 중단했습니다.", "Stopped: a connected device was found just before removal."),
+        ["reset.abortPresenceUnknown"] = ("연결 여부를 확인하지 못해 중단했습니다.", "Stopped: could not determine whether the device is connected."),
+        ["reset.notEligible"] = ("정리 대상이 아니어서 건너뛰었습니다.", "Skipped: not an eligible port record."),
+        ["reset.nowConnected"] = ("연결되어 있어 건너뛰었습니다.", "Skipped: the device is connected."),
+        ["reset.removeFailed"] = ("장치 기록을 삭제하지 못했습니다.", "Could not remove the device record."),
+        ["reset.doneRecordRemoved"] = ("기록을 삭제했습니다.", "Record removed."),
+        ["reset.doneNumberKept"] = ("기록을 삭제했습니다. 다른 사용처가 있어 번호는 유지합니다.", "Record removed. The number is kept because something else uses it."),
+        ["reset.doneNumberReleased"] = ("기록을 삭제하고 번호를 해제했습니다.", "Record removed and number released."),
+        ["reset.releaseFailedAfterRemoval"] = ("기록은 삭제했지만 번호를 해제하지 못했습니다.", "Record removed, but the number could not be released."),
+        ["reset.reservedNotEligible"] = ("예약만 남은 번호가 아니어서 건너뛰었습니다.", "Skipped: not a reserved-only number."),
+        ["reset.doneReleasedOnly"] = ("번호를 해제했습니다.", "Number released."),
+        ["reset.releaseFailed"] = ("번호를 해제하지 못했습니다.", "Could not release the number."),
+        ["reset.abortPlanInvalid"] = ("계획 파일이 없거나 형식이 올바르지 않아 아무것도 바꾸지 않았습니다.", "The plan file is missing or malformed; nothing was changed."),
+        ["reset.abortUnexpected"] = ("예기치 않은 오류로 중단했습니다.", "Stopped by an unexpected error."),
+        ["reset.title"] = ("COM 포트 정리", "Clean up COM ports"),
+        ["reset.intro"] = ("연결되지 않은 장비의 기록과 예약 번호를 지웁니다. 연결된 장비는 건드리지 않습니다.", "Removes records and reserved numbers of devices that are not connected. Connected devices are never touched."),
+        ["reset.loading"] = ("장치 기록을 읽는 중…", "Reading device records…"),
+        ["reset.loadFailed"] = ("장치 기록을 읽지 못했습니다: {0}", "Could not read device records: {0}"),
+        ["reset.retry"] = ("다시 시도", "Retry"),
+        ["reset.empty"] = ("정리할 항목이 없습니다.", "Nothing to clean up."),
+        ["reset.group.usb"] = ("연결되지 않은 USB 시리얼 기록", "Disconnected USB serial records"),
+        ["reset.group.same"] = ("같은 장비가 연결 중", "Same device is connected"),
+        ["reset.group.virtual"] = ("가상·블루투스 포트", "Virtual and Bluetooth ports"),
+        ["reset.group.reserved"] = ("사용처 확인 안 됨", "Usage not confirmed"),
+        ["reset.tag.keepsNumber"] = ("다른 사용처가 있어 번호는 유지", "Number is kept (used elsewhere)"),
+        ["reset.reservedOnlyLine"] = ("기록 없이 예약만 남은 번호", "Reserved number with no device record"),
+        ["reset.selectReserved"] = ("예약만 남은 번호 모두 선택", "Select all reserved-only numbers"),
+        ["reset.note"] = ("기록을 지운 장비를 다시 꽂으면 새 번호를 받습니다.", "A device whose record was removed gets a new number when plugged in again."),
+        ["reset.selected"] = ("선택 {0}개", "{0} selected"),
+        ["reset.run"] = ("실행", "Run"),
+        ["reset.close"] = ("닫기", "Close"),
+        ["reset.confirm"] = ("선택한 {0}개 항목의 기록과 예약 번호를 지웁니다. 되돌릴 수 없습니다. 계속할까요?", "This removes the records and reserved numbers of {0} selected items. It cannot be undone. Continue?"),
+        ["reset.running"] = ("정리하는 중… 관리자 권한 확인 창이 뜨면 허용해 주세요.", "Cleaning up… Allow the administrator prompt when it appears."),
+        ["reset.cancelled"] = ("취소되어 아무것도 바뀌지 않았습니다", "Cancelled; nothing was changed."),
+        ["reset.failed"] = ("정리를 실행하지 못했습니다. 아무것도 바뀌지 않았는지 목록을 다시 확인해 주세요.", "Could not run the cleanup. Re-check the list to see what changed."),
+        ["reset.resultTitle"] = ("정리 결과", "Cleanup result"),
+        ["reset.aborted"] = ("중단됨: {0}", "Aborted: {0}"),
+        ["reset.detail"] = ("원인: {0}", "Cause: {0}"),
+        ["reset.dryRunNote"] = ("시험 실행: 실제로는 바꾸지 않았습니다.", "Dry run: nothing was actually changed."),
+        ["reset.demoNote"] = ("데모 모드: 시스템을 바꾸지 않고 가짜 백엔드로 모의 실행합니다.", "Demo mode: simulated with a fake backend; the system is not touched."),
+        ["reset.status.Done"] = ("완료", "Done"),
+        ["reset.status.SkippedNowConnected"] = ("건너뜀(연결됨)", "Skipped (connected)"),
+        ["reset.status.SkippedNotEligible"] = ("건너뜀", "Skipped"),
+        ["reset.status.DonePendingReboot"] = ("재부팅 필요", "Reboot required"),
+        ["reset.donePendingReboot"] = ("삭제가 재부팅 후에 끝납니다. 번호는 그대로 예약해 두었습니다. 재부팅한 뒤 정리를 다시 실행해 주세요.", "The removal finishes after a reboot. The number is still reserved. Reboot, then run the cleanup again."),
+        ["reset.expected"] = ("예상 결과: 기록 {0}개 삭제, 번호 {1}개 해제", "Expected: {0} records removed, {1} numbers released"),
+        ["settings.reset"] = ("COM 포트 정리…", "Clean up COM ports…"),
+        ["reset.needsPublishedBuild"] = ("정리는 단일 파일로 게시한 exe에서만 실행할 수 있습니다. 개발 빌드에서는 실행하지 않습니다.", "Cleanup runs only from the published single-file exe, not from a development build."),
+        ["reset.bootstrapFailed"] = ("정리를 시작하기 전 준비 단계에서 멈췄습니다. 아무것도 바뀌지 않았습니다. 다시 시도할 수 있습니다.", "Cleanup stopped in the preparation step before it started. Nothing was changed. You can try again."),
+        ["reset.deselectAll"] = ("모두 해제", "Clear all"),
+        ["reset.toggleGroup"] = ("그룹 선택/해제", "Select/clear group"),
+        ["reset.exitBlocked"] = ("정리를 실행하는 중에는 종료할 수 없습니다. 끝난 뒤 다시 종료해 주세요.", "Cannot exit while a cleanup is running. Exit again after it finishes."),
+        ["reset.pathInvalid"] = ("정리에 쓰는 폴더가 안전하지 않아 시작하지 않았습니다 (링크이거나 네트워크 경로). 아무것도 바뀌지 않았습니다: {0}", "The folder used for cleanup is not safe (a link or a network path), so it was not started. Nothing was changed: {0}"),
+        ["reset.status.Failed"] = ("실패", "Failed"),
+    };
+
+    /// <summary>화면 언어를 정한다. "ko"/"en" 명시값이 우선이고, 그 외("auto" 포함)는 UI 문화권을 따른다.</summary>
+    public static string ResolveLanguage(string? setting, CultureInfo ui)
+    {
+        if (setting is "ko" or "en") return setting;
+        return ui.TwoLetterISOLanguageName == "ko" ? "ko" : "en";
+    }
+
+    public static IReadOnlyCollection<string> Keys => Table.Keys;
+
+    /// <summary>키에 해당하는 문구. "en"이 아니면 한국어를 돌려준다. 없는 키는 예외이다.</summary>
+    public static string Get(string key, string language)
+    {
+        var (ko, en) = Table[key];
+        return language == "en" ? en : ko;
+    }
+}
