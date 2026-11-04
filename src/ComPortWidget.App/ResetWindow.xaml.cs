@@ -283,8 +283,9 @@ public partial class ResetWindow : Window
                 ShowStatus("reset.needsPublishedBuild");
                 return;
             }
+            var (confirmRecords, confirmNumbers) = ResetPlanner.Summarize(selected);
             var ask = MessageBox.Show(this,
-                string.Format(CultureInfo.CurrentCulture, Strings.Get("reset.confirm", Lang), selected.Count),
+                string.Format(CultureInfo.CurrentCulture, Strings.Get("reset.confirm", Lang), confirmRecords, confirmNumbers),
                 Strings.Get("reset.title", Lang), MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (ask != MessageBoxResult.Yes) return;
         }

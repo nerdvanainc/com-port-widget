@@ -97,7 +97,7 @@ public static class Strings
         ["reset.selected"] = ("선택 {0}개", "{0} selected"),
         ["reset.run"] = ("실행", "Run"),
         ["reset.close"] = ("닫기", "Close"),
-        ["reset.confirm"] = ("선택한 {0}개 항목의 기록과 예약 번호를 지웁니다. 되돌릴 수 없습니다. 계속할까요?", "This removes the records and reserved numbers of {0} selected items. It cannot be undone. Continue?"),
+        ["reset.confirm"] = ("선택한 항목을 정리합니다: 기록 {0}개 삭제, 번호 {1}개 해제. 되돌릴 수 없습니다. 계속할까요?", "This will clean up the selection: {0} records removed, {1} numbers released. It cannot be undone. Continue?"),
         ["reset.running"] = ("정리하는 중… 관리자 권한 확인 창이 뜨면 허용해 주세요.", "Cleaning up… Allow the administrator prompt when it appears."),
         ["reset.cancelled"] = ("취소되어 아무것도 바뀌지 않았습니다", "Cancelled; nothing was changed."),
         ["reset.failed"] = ("정리를 실행하지 못했습니다. 아무것도 바뀌지 않았는지 목록을 다시 확인해 주세요.", "Could not run the cleanup. Re-check the list to see what changed."),

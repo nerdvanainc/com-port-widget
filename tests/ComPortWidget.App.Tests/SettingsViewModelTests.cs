@@ -42,6 +42,38 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public void Reload_without_change_raises_no_collection_change_and_keeps_instances()
+    {
+        var (vm, sv, _) = Create();
+        vm.SetMemo(vm.Connected.Single(r => r.PortName == "COM3").Key, "메모 A");
+        sv.ReloadMemos();
+        var before = sv.Memos.ToList();
+        var changes = 0;
+        sv.Memos.CollectionChanged += (_, _) => changes++;
+
+        sv.ReloadMemos();
+
+        Assert.Equal(0, changes);
+        Assert.Single(sv.Memos);
+        Assert.Same(before[0], sv.Memos[0]);
+    }
+
+    [Fact]
+    public void Reload_changes_only_the_changed_items()
+    {
+        var (vm, sv, _) = Create();
+        var a = vm.Connected.Single(r => r.PortName == "COM3");
+        vm.SetMemo(a.Key, "메모 A");
+        sv.ReloadMemos();
+        var kept = sv.Memos[0];
+        vm.SetMemo(a.Key, "메모 B");
+        sv.ReloadMemos();
+        Assert.Single(sv.Memos);
+        Assert.Equal("메모 B", sv.Memos[0].Memo);
+        Assert.NotSame(kept, sv.Memos[0]);
+    }
+
+    [Fact]
     public void Deleting_a_memo_removes_it_and_clears_the_visible_row()
     {
         var (vm, sv, _) = Create();

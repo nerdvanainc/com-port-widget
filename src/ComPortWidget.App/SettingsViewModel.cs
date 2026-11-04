@@ -149,9 +149,26 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, IDisposable
     /// <summary>저장된 메모 목록을 다시 채운다. 위젯에서 메모를 고쳤을 때를 위해 창을 다시 활성화할 때도 부른다.</summary>
     public void ReloadMemos()
     {
-        Memos.Clear();
-        foreach (var (key, memo) in _vm.Data.Memos.OrderBy(p => p.Key, StringComparer.Ordinal))
-            Memos.Add(new MemoItem(key, memo));
+        var wanted = _vm.Data.Memos.OrderBy(p => p.Key, StringComparer.Ordinal)
+            .Select(p => new MemoItem(p.Key, p.Value)).ToList();
+        SyncMemos(Memos, wanted);
+    }
+
+    /// <summary>
+    /// 목록을 제자리에서 맞춘다. 바뀐 항목만 넣고 빼므로 그대로인 줄은 같은 인스턴스(같은 화면 컨테이너)를 유지한다.
+    /// Clear 후 다시 채우면 창을 활성화하는 클릭 직전에 줄이 교체되어 첫 클릭이 사라진다.
+    /// </summary>
+    public static void SyncMemos(ObservableCollection<MemoItem> target, IReadOnlyList<MemoItem> wanted)
+    {
+        for (var i = target.Count - 1; i >= 0; i--)
+            if (!wanted.Contains(target[i])) target.RemoveAt(i);
+        for (var i = 0; i < wanted.Count; i++)
+        {
+            if (i < target.Count && target[i] == wanted[i]) continue;
+            var at = target.IndexOf(wanted[i]);
+            if (at < 0) target.Insert(i, wanted[i]);
+            else target.Move(at, i);
+        }
     }
 
     public void DeleteMemo(MemoItem item)
