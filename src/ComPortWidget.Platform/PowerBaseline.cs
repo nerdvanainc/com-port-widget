@@ -64,7 +64,7 @@ public static class PowerBaseline
         return wake.Value;
     }
 
-    /// <summary>BootType: 0 = 일반 부팅, 1 = 빠른 시작, 2 = 최대 절전 복귀. 1과 2를 재개로 본다. 빠른 시작 판별은 실기 검증 항목이다.</summary>
+    /// <summary>BootType: 0 = 일반 부팅, 1 = 빠른 시작, 2 = 최대 절전 복귀. 1과 2를 재개로 본다.</summary>
     private static bool IsFastStartup(EventRecord e) =>
         e.Properties.Count > 0 && Convert.ToInt64(e.Properties[0].Value) is 1 or 2;
 
