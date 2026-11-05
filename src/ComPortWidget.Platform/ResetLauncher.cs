@@ -14,7 +14,7 @@ public interface IProcessStarter
 
 /// <summary>
 /// 위젯 exe를 UAC(runas)로 직접 승격해 정리 전용 프로세스를 띄우고 결과 파일까지 확인한다.
-/// 승격된 프로세스는 Program.Main에서 시스템 DLL 경로를 고정하고, 계획과 결과 파일은 R14 검사를 거친다.
+/// 승격된 프로세스는 Program.Main에서 시스템 DLL 경로를 고정하고, 계획과 결과 파일은  검사를 거친다.
 /// </summary>
 public sealed class ResetLauncher(IProcessStarter starter, string? exePath = null)
 {
