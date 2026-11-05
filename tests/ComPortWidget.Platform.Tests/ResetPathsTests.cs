@@ -71,4 +71,29 @@ public class ResetPathsTests : IDisposable
         var deep = Path.Combine(link, "child");
         Assert.False(ResetPaths.TryValidate(Path.Combine(deep, "reset-plan.json"), Path.Combine(deep, "reset-result.json"), out _, out _));
     }
+
+    public static IEnumerable<object[]> BadPaths()
+    {
+        var bs = "\\";
+        yield return new object[] { "C:" + bs + "a|b" + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "a\"b" + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "a<b" + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "a*b" + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "a:b" + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "dir" + bs + "reset-plan.json:stream" };
+        yield return new object[] { "C:" + bs + "dir" + bs + "reset-plan.json::$DATA" };
+        yield return new object[] { "C:" + bs + "a" + new string('x', 400) + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "a" + (char)0 + "b" + bs + "reset-plan.json" };
+        yield return new object[] { "C:" + bs + "a" + (char)1 + "b" + bs + "reset-plan.json" };
+        yield return new object[] { bs + bs + "?" + bs + "C:" + bs + "reset-plan.json" };
+    }
+
+    [Theory]
+    [MemberData(nameof(BadPaths))]
+    public void Invalid_path_forms_fail_without_throwing(string plan)
+    {
+        Assert.False(ResetPaths.TryValidate(plan, plan.Replace("reset-plan.json", "reset-result.json"), out var folder, out var error));
+        Assert.Equal("", folder);
+        Assert.False(string.IsNullOrEmpty(error));
+    }
 }

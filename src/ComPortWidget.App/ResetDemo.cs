@@ -32,7 +32,7 @@ internal static class ResetDemo
     {
         var memos = new Dictionary<string, string>(baseMemos);
         foreach (var r in records)
-            if (r.InstanceId.Contains("AA:BB:CC:00:00:01", StringComparison.Ordinal))
+            if (r.InstanceId.Contains("AA:BB:CC:00:00:01"))
                 memos[DeviceIdentity.Resolve(r).Value] = "ESP32-S3 보드";
         return memos;
     }

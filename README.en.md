@@ -28,13 +28,12 @@ The program never opens a COM port, so it does not get in the way of a terminal 
 
 ## Requirements
 
-- Windows 10 or later, 64-bit (x64). The list and notes have no further restriction.
+- Windows 10 version 1903 or later, 64-bit. .NET Framework 4.8 is part of Windows from that version on, so there is nothing to install.
 - The cleanup function needs Windows 10 version 2004 or later, because it uses `pnputil /remove-device`, which was added in that version.
-- No separate .NET install. The runtime is inside the exe.
 
 ## Download and run
 
-Get `ComPortWidget-<version>-win64.zip` and `SHA256SUMS.txt` from the [Releases page](https://github.com/nerdvanainc/com-port-widget/releases). The zip holds `ComPortWidget.exe`, `LICENSE`, `NOTICE.md`, `NOTICE.en.md` and `THIRD_PARTY_NOTICES.md`.
+Get `ComPortWidget-<version>-win64.zip` and `SHA256SUMS.txt` from the [Releases page](https://github.com/nerdvanainc/com-port-widget/releases). The zip contains a folder `ComPortWidget-<version>` holding `ComPortWidget.exe`, `LICENSE`, `NOTICE.md`, `NOTICE.en.md` and `THIRD_PARTY_NOTICES.md`.
 
 Check the download:
 
@@ -44,7 +43,7 @@ Get-FileHash ComPortWidget-0.1.0-win64.zip -Algorithm SHA256
 
 The value must match the one in `SHA256SUMS.txt`.
 
-Run `ComPortWidget.exe`. There is no installer. In 0.1.0 the exe is about 72 MiB (75.5 MB). The runtime is compressed inside it, so it is smaller than the same build without compression (173 MB) and starts a little slower. On the development PC (Windows 11), the time from launch to the window appearing was 1.2 to 1.7 seconds for the compressed build and 0.9 to 1.6 seconds for the uncompressed one.
+Run `ComPortWidget.exe` from the extracted folder. There is no installer. In 0.1.0 the exe is about 210 KiB and the zip about 98 KiB. Extract the zip into a folder of its own, not into Downloads, a shared folder or a synced folder. Other files next to the exe, such as a `.config` file, can make the program run code. On a PC where you use the cleanup, a folder only administrators can write to, such as under `C:\Program Files`, is safer (see [NOTICE.en.md](NOTICE.en.md)).
 
 ### SmartScreen warning on the first run
 
@@ -107,18 +106,11 @@ A device whose record was removed gets a newly free number when plugged in again
 
 Only the disconnected USB serial records are selected by default. Everything else you select yourself. Before running, the window shows what will be removed, with notes and last-seen times, plus the expected result ("N records removed, M numbers released"), and asks for one more confirmation.
 
-### The UAC prompt shows Windows PowerShell
+### The UAC prompt shows "Unknown publisher"
 
-Removing device records needs administrator rights. The widget itself runs as a normal user and elevates only for the cleanup. This is how:
+Removing device records needs administrator rights. The widget itself runs as a normal user. For the cleanup only, it starts the same `ComPortWidget.exe` again in a cleanup-only mode and elevates it through UAC. The exe has no code signature, so the UAC prompt shows `ComPortWidget.exe` with "Unknown publisher". An unsigned program always appears this way.
 
-1. The widget starts the system's Windows PowerShell (`powershell.exe`) through UAC.
-2. That PowerShell creates the folder `C:\Program Files\ComPortWidget-Cleanup-<GUID>` and copies the running exe into it. It checks that the copy has the same hash as the original.
-3. It runs the copy in the cleanup-only mode. Because the copy runs from a location ordinary users cannot write to, a DLL planted next to the original exe cannot be loaded with administrator rights.
-4. When it finishes, the temporary folder is deleted.
-
-This is why the UAC prompt shows "Windows PowerShell" and not the app name. The exe is unsigned, so elevating the exe directly would show "Unknown publisher"; with this method what gets elevated is Windows' own PowerShell. While the cleanup runs, the temporary folder is visible under Program Files, and it is gone afterwards.
-
-Cleanup does not run from a development build (`dotnet run`). It runs only from the exe published as a single file.
+The cleanup-only mode creates no window, validates the plan file again and processes only the items you selected. System DLLs are restricted to System32.
 
 The limits that remain are listed in [NOTICE.en.md](NOTICE.en.md).
 
@@ -128,7 +120,7 @@ The program does not use the network. There is no telemetry, update check or err
 
 ## Build from source
 
-You need the .NET 10 SDK (see `global.json`).
+You need the .NET SDK (see `global.json`) and the .NET Framework 4.8 developer pack. The app targets .NET Framework 4.8, and the app project compiles the Core and Platform sources directly, so the build produces a single exe.
 
 ```powershell
 dotnet build ComPortWidget.sln -c Release
@@ -136,11 +128,11 @@ dotnet test ComPortWidget.sln -c Release
 pwsh packaging/make_release.ps1 -Version 0.1.0   # writes the zip and SHA256SUMS.txt under dist/
 ```
 
-The unit tests use xUnit and cover device identification, list order and highlighting, storage, the cleanup plan and its safeguards, and the elevation script. Removing real device records is not part of the automated tests.
+The unit tests use xUnit and cover device identification, list order and highlighting, the storage file format, the cleanup plan and its safeguards, and command-line handling. Removing real device records is not part of the automated tests.
 
 ## License
 
-The source code is under the MIT license. See [LICENSE](LICENSE). Parts of the .NET runtime bundled in the release exe are under Microsoft terms; the split by file is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Changes are in [CHANGELOG.en.md](CHANGELOG.en.md).
+The source code is under the MIT license. See [LICENSE](LICENSE). The release exe contains no third-party code ([THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Changes are in [CHANGELOG.en.md](CHANGELOG.en.md).
 
 ## About the company
 

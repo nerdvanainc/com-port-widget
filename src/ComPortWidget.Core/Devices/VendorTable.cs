@@ -45,7 +45,7 @@ public static class VendorTable
     public static string DisplayDescription(DeviceRecord r)
     {
         if (!string.IsNullOrWhiteSpace(r.BusDescription))
-            return r.BusDescription.Trim();
+            return r.BusDescription!.Trim();
         if (!string.IsNullOrWhiteSpace(r.FriendlyName))
             return ComSuffix.Replace(r.FriendlyName, string.Empty).Trim();
         return string.Empty;

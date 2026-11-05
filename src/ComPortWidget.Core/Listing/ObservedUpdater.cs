@@ -32,7 +32,7 @@ public static class ObservedUpdater
     {
         var present = new HashSet<string>(state.Present, StringComparer.Ordinal);
         var absent = new HashSet<string>(state.Absent, StringComparer.Ordinal);
-        var observed = new Dictionary<string, ObservedTimes>(stored, StringComparer.Ordinal);
+        var observed = stored.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
 
         foreach (var r in current)
         {

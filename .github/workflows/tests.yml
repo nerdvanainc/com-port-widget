@@ -1,4 +1,6 @@
 # Build and unit tests on Windows. No secrets are used.
+# The projects target .NET Framework 4.8, which is part of the windows-latest image.
+# The .NET SDK (see global.json) only drives the build.
 name: tests
 on:
   push:
@@ -18,3 +20,8 @@ jobs:
         run: dotnet build ComPortWidget.sln -c Release
       - name: Test
         run: dotnet test ComPortWidget.sln -c Release --no-build
+      - name: Release package contains only the exe
+        shell: pwsh
+        run: |
+          pwsh packaging/make_release.ps1 -Version 0.0.0
+          if (-not (Test-Path dist/ComPortWidget-0.0.0-win64.zip)) { throw 'zip missing' }

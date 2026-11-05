@@ -2,22 +2,23 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>ComPortWidget</AssemblyName>
     <StartupObject>ComPortWidget.App.Program</StartupObject>
     <RootNamespace>ComPortWidget.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- exe 옆에 .config 파일을 만들지 않는다(exe 하나만 배포) -->
+    <GenerateSupportedRuntime>false</GenerateSupportedRuntime>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>false</GenerateBindingRedirectsOutputType>
+    <DebugType>none</DebugType>
     <!-- 버전과 제품 정보. 릴리스 스크립트가 -p:Version=... 으로 덮어쓴다 -->
     <Version>0.1.0</Version>
     <Product>COM Port Widget</Product>
     <Company>Nerdvana Inc.</Company>
     <Copyright>Copyright (c) 2026 Nerdvana Inc.</Copyright>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
-    <!-- 단일 exe 압축: 173 MB -> 약 75 MB, 시작 시간은 약 0.25초 늘어난다(README 참조) -->
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,8 +32,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ComPortWidget.Core\ComPortWidget.Core.csproj" />
-    <ProjectReference Include="..\ComPortWidget.Platform\ComPortWidget.Platform.csproj" />
+    <!-- exe 하나만 배포하므로 Core와 Platform은 프로젝트 참조가 아니라 소스를 직접 포함한다 -->
+    <Compile Include="..\ComPortWidget.Core\**\*.cs" Exclude="..\ComPortWidget.Core\obj\**;..\ComPortWidget.Core\bin\**" LinkBase="Core" />
+    <Compile Include="..\ComPortWidget.Platform\**\*.cs" Exclude="..\ComPortWidget.Platform\obj\**;..\ComPortWidget.Platform\bin\**" LinkBase="Platform" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    
+    
   </ItemGroup>
 
 </Project>

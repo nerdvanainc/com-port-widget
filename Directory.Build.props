@@ -1,8 +1,21 @@
 <Project>
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <LangVersion>latest</LangVersion>
+    <!-- 같은 소스를 여러 프로젝트가 포함하므로 내부 형식이 겹쳐도 경고로 막지 않는다 -->
+    <NoWarn>$(NoWarn);CS0436</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <Using Include="System" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.IO" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Threading" />
+    <Using Include="System.Threading.Tasks" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 모든 프로젝트가 같은 호환 선언(init, 널 특성 등)을 쓴다 -->
+    <Compile Include="$(MSBuildThisFileDirectory)src\Shared\Polyfills.cs" Link="Polyfills.cs" />
+  </ItemGroup>
 </Project>

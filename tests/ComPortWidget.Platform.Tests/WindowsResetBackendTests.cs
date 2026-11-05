@@ -59,7 +59,7 @@ public class WindowsResetBackendTests : IDisposable
         Make(false, runner, new FakeComDb()).RemoveDevice("USB\\VID_1&PID_2\\FAKE1");
         var call = Assert.Single(runner.Calls);
         Assert.EndsWith("pnputil.exe", call.Exe, StringComparison.OrdinalIgnoreCase);
-        Assert.True(Path.IsPathFullyQualified(call.Exe));
+        Assert.True(Compat.IsPathFullyQualified(call.Exe));
         Assert.Equal(new[] { "/remove-device", "USB\\VID_1&PID_2\\FAKE1" }, call.Args);
     }
 

@@ -82,22 +82,22 @@ public partial class WidgetWindow : Window
     {
         var s = _vm.Data.Settings;
         var work = SystemParameters.WorkArea;
-        double w = s.Width is { } sw && double.IsFinite(sw) && sw >= MinWidth ? sw : Width;
-        double h = s.Height is { } sh && double.IsFinite(sh) && sh >= MinHeight ? sh : Height;
+        double w = s.Width is { } sw && Num.IsFinite(sw) && sw >= MinWidth ? sw : Width;
+        double h = s.Height is { } sh && Num.IsFinite(sh) && sh >= MinHeight ? sh : Height;
         w = Math.Min(w, work.Width);
         h = Math.Min(h, work.Height);
         double left, top;
-        if (s.Left is { } l && s.Top is { } t && double.IsFinite(l) && double.IsFinite(t) && IsOnScreen(l, t, w, h))
+        if (s.Left is { } l && s.Top is { } t && Num.IsFinite(l) && Num.IsFinite(t) && IsOnScreen(l, t, w, h))
         {
             left = l; top = t;
         }
         else if (s.Left is not null && s.Top is not null)
         {
             // 모니터 구성이 바뀌어 화면 밖이 되었으면 주 모니터 안으로 옮긴다
-            left = Math.Clamp(s.Left.Value, work.Left, Math.Max(work.Left, work.Right - w));
-            top = Math.Clamp(s.Top.Value, work.Top, Math.Max(work.Top, work.Bottom - h));
-            if (!double.IsFinite(left)) left = work.Right - w - 16;
-            if (!double.IsFinite(top)) top = work.Top + 16;
+            left = Num.Clamp(s.Left.Value, work.Left, Math.Max(work.Left, work.Right - w));
+            top = Num.Clamp(s.Top.Value, work.Top, Math.Max(work.Top, work.Bottom - h));
+            if (!Num.IsFinite(left)) left = work.Right - w - 16;
+            if (!Num.IsFinite(top)) top = work.Top + 16;
         }
         else
         {
@@ -286,7 +286,7 @@ public partial class WidgetWindow : Window
         sb.AppendLine($"{Strings.Get("info.key", Lang)}: {r.Key.Value}");
         sb.AppendLine($"{Strings.Get("info.arrival", Lang)}: {T(r.Record.LastArrival)}");
         sb.Append($"{Strings.Get("info.removal", Lang)}: {T(r.Record.LastRemoval)}");
-        MessageBox.Show(this, sb.ToString(), Strings.Get("menu.device_info", Lang), MessageBoxButton.OK, MessageBoxImage.Information);
+        ThemedDialog.Inform(this, sb.ToString(), Strings.Get("menu.device_info", Lang), Lang);
     }
 
     // ---- Win32 ----

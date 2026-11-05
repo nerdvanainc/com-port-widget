@@ -3,8 +3,7 @@ using System.Diagnostics;
 
 namespace ComPortWidget.Platform;
 
-/// <summary>BootstrapFailed: 정리 프로세스를 시작하기 전에 준비 단계(폴더, 복사, 해시 검증)에서 멈췄다. 아무것도 바뀌지 않았고 다시 시도할 수 있다.</summary>
-public enum LaunchOutcome { Completed, Cancelled, Failed, BootstrapFailed }
+public enum LaunchOutcome { Completed, Cancelled, Failed }
 
 /// <summary>프로그램을 관리자 권한(runas)으로 실행하고 종료 코드를 돌려준다. 테스트는 가짜 구현을 쓴다.</summary>
 public interface IProcessStarter
@@ -14,22 +13,12 @@ public interface IProcessStarter
 }
 
 /// <summary>
-/// UAC 승격된 PowerShell로 exe를 관리자 전용 임시 폴더에 복사해 정리 전용 프로세스를 띄우고 결과 파일까지 확인한다.
-/// exe를 직접 승격하지 않는다(단일 exe는 시작 전에 옆 폴더의 DLL을 읽을 수 있다).
+/// 위젯 exe를 UAC(runas)로 직접 승격해 정리 전용 프로세스를 띄우고 결과 파일까지 확인한다.
+/// 승격된 프로세스는 Program.Main에서 시스템 DLL 경로를 고정하고, 계획과 결과 파일은 R14 검사를 거친다.
 /// </summary>
-public sealed class ResetLauncher(IProcessStarter starter, string? exePath = null, Func<string, string>? hashFile = null)
+public sealed class ResetLauncher(IProcessStarter starter, string? exePath = null)
 {
     private const int ErrorCancelled = 1223;
-
-    /// <summary>System32의 Windows PowerShell 절대경로.</summary>
-    public static string PowerShellPath { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
-
-    private static string Sha256Of(string path)
-    {
-        using var fs = File.OpenRead(path);
-        return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(fs));
-    }
     private const int BaseSeconds = 120;
     private const int SecondsPerItem = 70;
     /// <summary>기다리는 시간의 상한(30분). 항목이 많아도 창과 앱이 몇 시간씩 닫히지 않게 한다.</summary>
@@ -42,7 +31,7 @@ public sealed class ResetLauncher(IProcessStarter starter, string? exePath = nul
     /// <param name="itemCount">계획의 항목 수. 기다리는 시간은 120초에 항목당 70초를 더하고 30분을 넘기지 않는다.</param>
     public LaunchOutcome Run(string planPath, string resultPath, int itemCount = 0, bool dryRun = false)
     {
-        if (!Path.IsPathFullyQualified(planPath) || !Path.IsPathFullyQualified(resultPath))
+        if (!Compat.IsPathFullyQualified(planPath) || !Compat.IsPathFullyQualified(resultPath))
             throw new ArgumentException("Plan and result paths must be absolute.");
 
         // 이전 실행이 남긴 결과를 이번 결과로 오인하지 않게 먼저 지운다
@@ -52,13 +41,11 @@ public sealed class ResetLauncher(IProcessStarter starter, string? exePath = nul
         int exit;
         try
         {
-            var exe = exePath ?? Environment.ProcessPath
+            var exe = exePath ?? Compat.ProcessPath
                 ?? throw new InvalidOperationException("Process path is unknown.");
-            var hash = (hashFile ?? Sha256Of)(exe);
-            var script = ElevationScript.Build(exe, hash, planPath, resultPath, Guid.NewGuid().ToString("D"), dryRun);
-            exit = starter.RunElevated(PowerShellPath,
-                ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", ElevationScript.Encode(script)],
-                WaitFor(itemCount));
+            var args = new List<string> { "--reset-plan", planPath, "--reset-result", resultPath };
+            if (dryRun) args.Add("--dry-run");
+            exit = starter.RunElevated(exe, args, WaitFor(itemCount));
         }
         catch (Win32Exception e) when (e.NativeErrorCode == ErrorCancelled)
         {
@@ -69,8 +56,6 @@ public sealed class ResetLauncher(IProcessStarter starter, string? exePath = nul
             return LaunchOutcome.Failed;
         }
 
-        if (exit is ElevationScript.ExitFolderFailed or ElevationScript.ExitCopyFailed or ElevationScript.ExitHashMismatch)
-            return LaunchOutcome.BootstrapFailed;
         if (exit != 0) return LaunchOutcome.Failed;
         return ResetFiles.ReadResult(resultPath) is null ? LaunchOutcome.Failed : LaunchOutcome.Completed;
     }
@@ -88,10 +73,10 @@ public sealed class ShellProcessStarter : IProcessStarter
             WorkingDirectory = Path.GetDirectoryName(exe) ?? "",
             WindowStyle = ProcessWindowStyle.Hidden,
         };
-        foreach (var a in args) psi.ArgumentList.Add(a);
+        psi.Arguments = Compat.JoinArguments(args);
         using var p = Process.Start(psi) ?? throw new InvalidOperationException("Process did not start.");
         // 승격된 프로세스는 이쪽에서 끝낼 수 없으므로 기다리기를 멈추고 호출부가 실패로 처리한다
-        if (!p.WaitForExit(timeout))
+        if (!p.WaitForExit((int)timeout.TotalMilliseconds))
             throw new TimeoutException("The elevated process did not finish in time.");
         return p.ExitCode;
     }

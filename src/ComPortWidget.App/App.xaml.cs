@@ -28,6 +28,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        ThemeHelper.RegisterForAllWindows();
 
         _demo = e.Args.Contains("--demo");
         // --demo는 아무것도 파일에 쓰지 않으므로 오류 기록도 설치하지 않는다
@@ -139,9 +140,8 @@ public partial class App : Application
     private void AskAutoStart(WidgetViewModel vm)
     {
         var lang = vm.Language;
-        var answer = MessageBox.Show(_window!, Strings.Get("autostart.prompt", lang), Strings.Get("app.name", lang),
-            MessageBoxButton.YesNo, MessageBoxImage.Question);
-        if (answer == MessageBoxResult.Yes && !AutoStart.Set(true))
+        var yes = ThemedDialog.Ask(_window, Strings.Get("autostart.prompt", lang), Strings.Get("app.name", lang), lang);
+        if (yes && !AutoStart.Set(true))
         {
             // 등록에 실패하면 헤더에 알리고, 답을 남기지 않아 다음 실행에 다시 묻는다
             vm.AutoStartFailed = true;
@@ -193,8 +193,7 @@ public partial class App : Application
         if (_resetWindow is { IsBusy: true })
         {
             var lang = _vm!.Language;
-            MessageBox.Show(_resetWindow, Strings.Get("reset.exitBlocked", lang), Strings.Get("app.name", lang),
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            ThemedDialog.Inform(_resetWindow, Strings.Get("reset.exitBlocked", lang), Strings.Get("app.name", lang), lang);
             return;
         }
         _watcher?.Dispose();

@@ -13,7 +13,7 @@ public static class MemoText
     public static string Normalize(string? memo)
     {
         if (string.IsNullOrEmpty(memo)) return "";
-        var text = FlattenLineBreaks(memo).Trim();
+        var text = FlattenLineBreaks(memo!).Trim();
         return text.Length > MaxLength ? text[..MaxLength] : text;
     }
 }

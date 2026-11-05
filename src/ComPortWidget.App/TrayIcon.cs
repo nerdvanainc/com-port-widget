@@ -5,6 +5,30 @@ using WinForms = System.Windows.Forms;
 
 namespace ComPortWidget.App;
 
+/// <summary>트레이 메뉴 색(위젯의 어두운 색과 맞춤).</summary>
+internal sealed class DarkMenuColors : WinForms.ProfessionalColorTable
+{
+    public static readonly Color Surface = Color.FromArgb(0x26, 0x2A, 0x31);
+    public static readonly Color Text = Color.FromArgb(0xE6, 0xE8, 0xEB);
+    private static readonly Color Line = Color.FromArgb(0x35, 0x3A, 0x43);
+    private static readonly Color Highlight = Color.FromArgb(0x17, 0x44, 0x3A);
+    private static readonly Color Accent = Color.FromArgb(0x2F, 0xBF, 0x8F);
+
+    public override Color ToolStripDropDownBackground => Surface;
+    public override Color ImageMarginGradientBegin => Surface;
+    public override Color ImageMarginGradientMiddle => Surface;
+    public override Color ImageMarginGradientEnd => Surface;
+    public override Color MenuBorder => Line;
+    public override Color MenuItemBorder => Accent;
+    public override Color MenuItemSelected => Highlight;
+    public override Color MenuItemSelectedGradientBegin => Highlight;
+    public override Color MenuItemSelectedGradientEnd => Highlight;
+    public override Color MenuItemPressedGradientBegin => Highlight;
+    public override Color MenuItemPressedGradientEnd => Highlight;
+    public override Color SeparatorDark => Line;
+    public override Color SeparatorLight => Line;
+}
+
 /// <summary>트레이 아이콘과 메뉴.</summary>
 internal sealed class TrayIcon : IDisposable
 {
@@ -29,7 +53,14 @@ internal sealed class TrayIcon : IDisposable
         _settings.Click += (_, _) => SettingsRequested?.Invoke();
         _exit.Click += (_, _) => ExitRequested?.Invoke();
 
-        var menu = new WinForms.ContextMenuStrip();
+        var menu = new WinForms.ContextMenuStrip
+        {
+            // 위젯과 같은 색
+            Renderer = new WinForms.ToolStripProfessionalRenderer(new DarkMenuColors()),
+            BackColor = DarkMenuColors.Surface,
+            ForeColor = DarkMenuColors.Text,
+            Font = new Font("Segoe UI", 9.75f),
+        };
         menu.Items.AddRange(new WinForms.ToolStripItem[]
         {
             _show, new WinForms.ToolStripSeparator(), _reset, _settings, new WinForms.ToolStripSeparator(), _exit,

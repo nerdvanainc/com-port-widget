@@ -60,12 +60,12 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding PortName}" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="Sep" Grid.Column="1" Text=" · " Foreground="#6B7480" Visibility="Collapsed"/>
+                            <TextBlock x:Name="Sep" Grid.Column="1" Text=" · " Foreground="#A3ACB6" Visibility="Collapsed"/>
                             <Grid x:Name="MemoArea" Grid.Column="2" Background="Transparent" Margin="6,0,0,0"
                                   MouseLeftButtonUp="MemoArea_MouseLeftButtonUp">
                                 <TextBlock x:Name="MemoText" Text="{Binding Memo}" TextTrimming="CharacterEllipsis"
                                            TextWrapping="NoWrap" Visibility="Collapsed"/>
-                                <TextBlock x:Name="AddMemo" Text="{Binding AddMemoText}" Foreground="#6B7480"
+                                <TextBlock x:Name="AddMemo" Text="{Binding AddMemoText}" Foreground="#A3ACB6"
                                            TextTrimming="CharacterEllipsis"/>
                                 <TextBox x:Name="EditBox" Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}"
                                          MaxLength="500" Visibility="Collapsed" Background="#12151A" Foreground="#E6E8EB"
@@ -80,7 +80,7 @@
                                 <TextBlock Text="{Binding NewText}" FontSize="10" FontWeight="Bold" Foreground="#0E1F1A"/>
                             </Border>
                         </Grid>
-                        <TextBlock Text="{Binding Line2}" ToolTip="{Binding Line2}" FontSize="11" Foreground="#9AA3AF"
+                        <TextBlock Text="{Binding Line2}" ToolTip="{Binding Line2}" FontSize="11" Foreground="#A3ACB6"
                                    TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Grid>
@@ -91,7 +91,7 @@
                         <Setter TargetName="Badge" Property="Visibility" Value="Visible"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding IsConnected}" Value="False">
-                        <Setter TargetName="Card" Property="Opacity" Value="0.6"/>
+                        <Setter TargetName="Card" Property="TextElement.Foreground" Value="#A3ACB6"/>
                         <Setter TargetName="Dot" Property="Fill" Value="#6B7480"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding HasMemo}" Value="True">
@@ -137,7 +137,7 @@
                 <StackPanel>
                     <ItemsControl ItemsSource="{Binding Connected}" ItemTemplate="{StaticResource RowTemplate}"
                                   Focusable="False"/>
-                    <TextBlock Text="{Binding EmptyText}" Foreground="#6B7480" Margin="16,8">
+                    <TextBlock Text="{Binding EmptyText}" Foreground="#A3ACB6" Margin="16,8">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -153,8 +153,8 @@
                             Visibility="{Binding HasDisconnected, Converter={StaticResource BoolToVis}}"
                             MouseLeftButtonUp="DisconnectedToggle_MouseLeftButtonUp">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock x:Name="Arrow" Foreground="#9AA3AF" Width="14"/>
-                            <TextBlock Text="{Binding DisconnectedText}" Foreground="#9AA3AF"/>
+                            <TextBlock x:Name="Arrow" Foreground="#A3ACB6" Width="14"/>
+                            <TextBlock Text="{Binding DisconnectedText}" Foreground="#A3ACB6"/>
                         </StackPanel>
                     </Border>
                     <ItemsControl x:Name="DisconnectedList" ItemsSource="{Binding Disconnected}"

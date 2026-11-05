@@ -114,12 +114,12 @@ public class WindowsDeviceSourceTests(ITestOutputHelper output)
         public object? GetValue(string name)
         {
             if (DeniedValues) throw new UnauthorizedAccessException();
-            return Values.GetValueOrDefault(name);
+            return Values.TryGetValue(name, out var v1) ? v1 : null;
         }
         public IRegistryNode? OpenSubKey(string name)
         {
             if (DeniedChildren.Contains(name)) throw new System.Security.SecurityException();
-            return Children.GetValueOrDefault(name);
+            return Children.TryGetValue(name, out var v2) ? v2 : null;
         }
         public void Dispose() { }
     }
@@ -131,7 +131,7 @@ public class WindowsDeviceSourceTests(ITestOutputHelper output)
         public IRegistryNode? Open(string path)
         {
             if (Denied.Contains(path)) throw new UnauthorizedAccessException();
-            return Roots.GetValueOrDefault(path);
+            return Roots.TryGetValue(path, out var v3) ? v3 : null;
         }
     }
 

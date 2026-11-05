@@ -1,0 +1,31 @@
+{
+  "Version": 1,
+  "Memos": {
+    "10C4:EA60:TEST0001": "시험용 보드 A",
+    "10C4:EA60:TEST0002": "escaped 시험 \"quote\" \\ back"
+  },
+  "Observed": {
+    "10C4:EA60:TEST0001": {
+      "Arrival": "2026-01-02T03:04:05.1234567+09:00",
+      "Removal": null
+    },
+    "10C4:EA60:TEST0002": {
+      "Arrival": "2026-03-04T05:06:07+00:00",
+      "Removal": "2026-03-05T05:06:07Z"
+    }
+  },
+  "Settings": {
+    "HighlightMinutes": 7,
+    "AlwaysOnTop": true,
+    "Language": "ko",
+    "AutoStartAsked": true,
+    "Hotkey": "Ctrl+Alt+Shift+C",
+    "Left": 12.5,
+    "Top": null,
+    "Width": 320,
+    "Height": 480.25,
+    "DisconnectedExpanded": true,
+    "FutureSetting": { "x": [1, 2, 3] }
+  },
+  "FutureTopLevel": "ignored"
+}

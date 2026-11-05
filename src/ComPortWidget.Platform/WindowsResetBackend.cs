@@ -1,10 +1,9 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using ComPortWidget.Core.Devices;
 using ComPortWidget.Core.Reset;
+using ComPortWidget.Core.Storage;
 
 namespace ComPortWidget.Platform;
 
@@ -43,11 +42,10 @@ internal sealed class RealProcessRunner : IProcessRunner
             RedirectStandardError = true,
             CreateNoWindow = true,
         };
-        foreach (var a in args) psi.ArgumentList.Add(a);
+        psi.Arguments = Compat.JoinArguments(args);
         try
         {
             // 콘솔 프로그램은 OEM 코드 페이지로 출력한다
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var oem = Encoding.GetEncoding(System.Globalization.CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
             psi.StandardOutputEncoding = oem;
             psi.StandardErrorEncoding = oem;
@@ -59,7 +57,7 @@ internal sealed class RealProcessRunner : IProcessRunner
         var stderr = p.StandardError.ReadToEndAsync();
         if (!p.WaitForExit(TimeoutMs))
         {
-            try { p.Kill(true); } catch (Exception) { }
+            try { p.Kill(); } catch (Exception) { }
             throw new TimeoutException("Process did not finish in time.");
         }
         Task.WaitAll(stdout, stderr);
@@ -84,12 +82,6 @@ internal sealed class RealComDbNative : IComDbNative
 /// </summary>
 public sealed class WindowsResetBackend : IResetBackend, IDryRunLog
 {
-    private static readonly JsonSerializerOptions BackupOptions = new()
-    {
-        WriteIndented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-    };
-
     private readonly string _backupDir;
     private readonly bool _dryRun;
     private readonly Func<IReadOnlyList<DeviceRecord>> _readRecords;
@@ -125,6 +117,20 @@ public sealed class WindowsResetBackend : IResetBackend, IDryRunLog
         _comDbTimeout = comDbTimeout ?? TimeSpan.FromSeconds(30);
     }
 
+    // 백업에 남길 장치 기록(이전 형식과 같은 속성 이름)
+    private static Dictionary<string, object?> BackupRecord(DeviceRecord r) => new()
+    {
+        ["InstanceId"] = r.InstanceId,
+        ["PortName"] = r.PortName,
+        ["Present"] = r.Present,
+        ["BusDescription"] = r.BusDescription,
+        ["FriendlyName"] = r.FriendlyName,
+        ["LastArrival"] = r.LastArrival,
+        ["LastRemoval"] = r.LastRemoval,
+        ["Ancestors"] = r.Ancestors.ToList(),
+        ["AncestorsIncomplete"] = r.AncestorsIncomplete,
+    };
+
     public IReadOnlyList<string> Actions => _actions;
 
     public IReadOnlyList<DeviceRecord> GetRecords() => _readRecords();
@@ -137,14 +143,18 @@ public sealed class WindowsResetBackend : IResetBackend, IDryRunLog
     {
         Directory.CreateDirectory(_backupDir);
         var comDb = _readComDb();
-        var json = JsonSerializer.SerializeToUtf8Bytes(new
+        var json = MiniJson.ToUtf8(new Dictionary<string, object?>
         {
-            Created = _clock().ToString("o"),
-            DryRun = _dryRun,
-            ComDbBase64 = Convert.ToBase64String(comDb),
-            Plan = new { plan.InstanceIds, plan.ReservedOnlyPorts },
-            Targets = targets,
-        }, BackupOptions);
+            ["Created"] = _clock().ToString("o", System.Globalization.CultureInfo.InvariantCulture),
+            ["DryRun"] = _dryRun,
+            ["ComDbBase64"] = Convert.ToBase64String(comDb),
+            ["Plan"] = new Dictionary<string, object?>
+            {
+                ["InstanceIds"] = plan.InstanceIds.ToList(),
+                ["ReservedOnlyPorts"] = plan.ReservedOnlyPorts.ToList(),
+            },
+            ["Targets"] = targets.Select(t => (object?)BackupRecord(t)).ToList(),
+        });
 
         // 같은 초에 두 번 써도 덮어쓰지 않도록 번호를 붙인다
         var stamp = _clock().ToString("yyyyMMdd-HHmmss");
@@ -154,8 +164,8 @@ public sealed class WindowsResetBackend : IResetBackend, IDryRunLog
             try
             {
                 using var fs = new FileStream(Path.Combine(_backupDir, name), FileMode.CreateNew, FileAccess.Write, FileShare.None);
-                fs.Write(json);
-                fs.Flush(flushToDisk: true);
+                fs.Write(json, 0, json.Length);
+                fs.Flush(true);
                 return;
             }
             catch (IOException) when (File.Exists(Path.Combine(_backupDir, name)) && i < 100)

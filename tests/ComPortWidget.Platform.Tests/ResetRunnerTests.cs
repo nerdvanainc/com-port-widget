@@ -179,4 +179,13 @@ public class ResetRunnerTests : IDisposable
         }
         finally { Directory.Delete(link); }
     }
+
+    [Fact]
+    public void Run_returns_bad_args_for_unprocessable_paths_instead_of_throwing()
+    {
+        var bs = "\\";
+        foreach (var bad in new[] { "C:" + bs + "a|b" + bs, "C:" + bs + "a*b" + bs, "C:" + bs + "a:b" + bs, "C:" + bs + new string('x', 400) + bs })
+            Assert.Equal(ResetRunner.ExitBadArgs,
+                ResetRunner.Run(new[] { "--reset-plan", bad + "reset-plan.json", "--reset-result", bad + "reset-result.json", "--dry-run" }, Fake));
+    }
 }

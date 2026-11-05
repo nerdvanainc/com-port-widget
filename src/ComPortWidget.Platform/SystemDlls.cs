@@ -1,46 +1,29 @@
-using System.Reflection;
 using System.Runtime.InteropServices;
+
+// 이 어셈블리(릴리스에서는 exe 하나)의 모든 DllImport는 System32에서만 DLL을 찾는다.
+// exe 옆에 심어 둔 DLL을 P/Invoke가 읽지 않게 하는 실제 보호 장치가 이 선언이다.
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 
 namespace ComPortWidget.Platform;
 
 /// <summary>
-/// 시스템 DLL을 항상 System32의 절대경로로 읽게 한다. exe와 같은 폴더에 심어 둔 DLL(DLL planting)이
-/// 관리자 권한 프로세스에 로드되는 것을 막는다. 허용 목록에 없는 이름은 거부한다.
+/// 시작 직후 프로세스 전체의 네이티브 DLL 검색 경로를 System32로 제한한다.
+/// 보호는 두 가지다. (1) 위의 어셈블리 수준 DefaultDllImportSearchPaths 선언, (2) 이 클래스의 SetDefaultDllDirectories.
+/// 그 밖의 경로, 예를 들어 CLR이 시작할 때 읽는 exe 옆의 .config 파일은 막지 못한다(NOTICE 참조).
 /// </summary>
 public static class SystemDlls
 {
     private const uint LoadLibrarySearchSystem32 = 0x00000800;
 
-    private static readonly HashSet<string> Allowed = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>
+    /// 프로세스 시작 직후에 부른다. 성공하면 true. 실패하면(이 API가 없는 오래된 Windows 등) false를 돌려줄 뿐
+    /// 다른 보정은 하지 않는다. 어셈블리 수준 선언이 P/Invoke를 계속 System32로 고정한다.
+    /// </summary>
+    public static bool Install()
     {
-        "kernel32", "user32", "advapi32", "setupapi", "cfgmgr32", "msports",
-    };
-
-    /// <summary>프로세스 시작 직후에 부른다. P/Invoke가 있는 어셈블리를 모두 넘긴다.</summary>
-    public static void Install(params Assembly[] assemblies)
-    {
-        foreach (var asm in assemblies)
-        {
-            try { NativeLibrary.SetDllImportResolver(asm, Resolve); }
-            catch (InvalidOperationException) { /* 이미 등록됨 */ }
-        }
-        // 이후의 모든 LoadLibrary 검색을 System32로 제한한다
-        SetDefaultDllDirectories(LoadLibrarySearchSystem32);
+        try { return SetDefaultDllDirectories(LoadLibrarySearchSystem32); }
+        catch (EntryPointNotFoundException) { return false; }
     }
-
-    /// <summary>라이브러리 이름을 System32의 절대경로로 바꾼다. 허용 목록에 없거나 경로 모양이면 예외.</summary>
-    internal static string PathFor(string libraryName)
-    {
-        var name = libraryName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
-            ? libraryName[..^4]
-            : libraryName;
-        if (!Allowed.Contains(name))
-            throw new DllNotFoundException("Library is not allowed: " + libraryName);
-        return Path.Combine(Environment.SystemDirectory, name + ".dll");
-    }
-
-    private static nint Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-        => NativeLibrary.Load(PathFor(libraryName));
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

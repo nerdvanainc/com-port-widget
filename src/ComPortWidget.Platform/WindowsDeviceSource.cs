@@ -165,7 +165,7 @@ public static class ComRegistry
         if (value is not string s) return false;
         s = s.Trim();
         return s.StartsWith("COM", StringComparison.OrdinalIgnoreCase)
-            && int.TryParse(s.AsSpan(3), out number) && number > 0;
+            && int.TryParse(s.Substring(3), out number) && number > 0;
     }
 
     private static void ReadSerialComm(IRegistryView view, HashSet<int> set)
@@ -208,7 +208,7 @@ public static class ComRegistry
         foreach (var sub in cls.GetSubKeyNames())
         {
             // Properties 같은 비숫자 키는 정상 PC에서도 접근이 거부되므로 읽지 않는다
-            if (sub.Length == 0 || !sub.All(char.IsAsciiDigit)) continue;
+            if (sub.Length == 0 || !sub.All(Compat.IsAsciiDigit)) continue;
             using var k = cls.OpenSubKey(sub);
             if (k is not null && TryParseComNumber(k.GetValue("AttachedTo"), out var n)) set.Add(n);
         }
@@ -352,7 +352,7 @@ internal sealed class SetupApiReader : IDevicePropertyReader, IDisposable
                 throw new InvalidOperationException(
                     $"Could not read the parent of '{current}' (ancestors of '{instanceId}'): {ex.Message}", ex);
             }
-            if (string.IsNullOrEmpty(parent)) break;
+            if (parent is null || parent.Length == 0) break;
             if (parent.StartsWith("ROOT\\", StringComparison.OrdinalIgnoreCase)
                 || parent.StartsWith("HTREE\\ROOT", StringComparison.OrdinalIgnoreCase)) break;
             list.Add(parent);
@@ -427,7 +427,10 @@ internal sealed class SetupApiReader : IDevicePropertyReader, IDisposable
             if (!NativeMethods.SetupDiGetDevicePropertyW(set, ref data, ref key, out type, buf, (uint)buf.Length, out required, 0)) return null;
         }
         if (type != expectedType) return null;
-        return buf.AsSpan(0, (int)Math.Min(required, (uint)buf.Length)).ToArray();
+        var len = (int)Math.Min(required, (uint)buf.Length);
+        var copy = new byte[len];
+        Array.Copy(buf, copy, len);
+        return copy;
     }
 
     private static string? ReadString(nint set, ref NativeMethods.SP_DEVINFO_DATA data, NativeMethods.DEVPROPKEY key)

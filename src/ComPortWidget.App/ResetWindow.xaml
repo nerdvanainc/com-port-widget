@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="COM ports cleanup" Width="560" Height="640" MinWidth="460" MinHeight="420"
         WindowStartupLocation="CenterScreen"
-        FontFamily="Segoe UI, Malgun Gothic" FontSize="13">
+        Style="{StaticResource AppWindow}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,7 +26,7 @@
                           VirtualizingPanel.VirtualizationMode="Recycling">
                 <ItemsControl.Template>
                     <ControlTemplate TargetType="ItemsControl">
-                        <Border BorderBrush="#C8CDD3" BorderThickness="1">
+                        <Border BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1">
                             <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Disabled">
                                 <ItemsPresenter/>
                             </ScrollViewer>
@@ -49,8 +49,8 @@
                             <CheckBox IsChecked="{Binding IsSelected}" Margin="12,3" Visibility="{Binding ItemVisibility}">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
-                                    <TextBlock Text="{Binding SubText}" FontSize="11" Foreground="#6B7480" TextWrapping="Wrap"/>
-                                    <TextBlock Text="{Binding Tag}" FontSize="11" Foreground="#9A6700" TextWrapping="Wrap"
+                                    <TextBlock Text="{Binding SubText}" FontSize="11" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Tag}" FontSize="11" Foreground="{StaticResource WarnBrush}" TextWrapping="Wrap"
                                                Visibility="{Binding TagVisibility}"/>
                                 </StackPanel>
                             </CheckBox>
@@ -62,7 +62,7 @@
             <ItemsControl x:Name="ResultList" Visibility="Collapsed">
                 <ItemsControl.Template>
                     <ControlTemplate TargetType="ItemsControl">
-                        <Border BorderBrush="#C8CDD3" BorderThickness="1">
+                        <Border BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1">
                             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                                 <ItemsPresenter/>
                             </ScrollViewer>
@@ -78,7 +78,7 @@
                                 <Run Text="{Binding StatusText, Mode=OneWay}"/>
                             </TextBlock>
                             <TextBlock Text="{Binding DetailText}" TextWrapping="Wrap" Visibility="{Binding DetailVisibility}"/>
-                            <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" Foreground="#C0392B" FontSize="11"
+                            <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" Foreground="{StaticResource DangerBrush}" FontSize="11"
                                        Visibility="{Binding ErrorVisibility}"/>
                         </StackPanel>
                     </DataTemplate>
@@ -87,10 +87,10 @@
         </Grid>
 
         <StackPanel Grid.Row="3" Margin="0,8,0,0">
-            <TextBlock x:Name="Note" TextWrapping="Wrap" Foreground="#6B7480"/>
+            <TextBlock x:Name="Note" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}"/>
             <TextBlock x:Name="CountText" Margin="0,2,0,0"/>
             <TextBlock x:Name="ExpectedText"/>
-            <TextBlock x:Name="ModeNote" TextWrapping="Wrap" Foreground="#6B7480" FontSize="11" Margin="0,2,0,0"/>
+            <TextBlock x:Name="ModeNote" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,2,0,0"/>
         </StackPanel>
 
         <DockPanel Grid.Row="4" Margin="0,10,0,0" LastChildFill="False">
@@ -100,7 +100,7 @@
                     AutomationProperties.AutomationId="DeselectAllButton"/>
             <Button x:Name="CloseButton" Click="Close_Click" DockPanel.Dock="Right" Padding="14,4" Margin="8,0,0,0"
                     AutomationProperties.AutomationId="CloseButton"/>
-            <Button x:Name="RunButton" Click="Run_Click" DockPanel.Dock="Right" Padding="14,4"
+            <Button x:Name="RunButton" Click="Run_Click" DockPanel.Dock="Right" Padding="14,4" Style="{StaticResource PrimaryButton}"
                     AutomationProperties.AutomationId="RunButton"/>
         </DockPanel>
     </Grid>

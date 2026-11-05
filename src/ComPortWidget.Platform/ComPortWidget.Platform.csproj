@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>net48</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <UseWindowsForms>true</UseWindowsForms>
+    
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    
+    
     <ProjectReference Include="..\ComPortWidget.Core\ComPortWidget.Core.csproj" />
   </ItemGroup>
 

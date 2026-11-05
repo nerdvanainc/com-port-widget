@@ -30,7 +30,7 @@ internal static class AutoStart
             using var key = Registry.CurrentUser.CreateSubKey(RunKey);
             if (enabled)
             {
-                var exe = Environment.ProcessPath;
+                var exe = ComPortWidget.Platform.Compat.ProcessPath;
                 if (string.IsNullOrEmpty(exe)) return false;
                 key.SetValue(ValueName, "\"" + exe + "\"");
             }

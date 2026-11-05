@@ -74,7 +74,7 @@ internal sealed class ResetResultRowViewModel(string target, string status, stri
 }
 
 /// <summary>
-/// 정리 화면. 후보는 엄격한 읽기로 불러오고, 실행은 UAC로 승격한 PowerShell이 exe 사본을 관리자 전용 폴더에서 돌리는 방식에 맡긴다.
+/// 정리 화면. 후보는 엄격한 읽기로 불러오고, 실행은 같은 exe를 UAC로 직접 승격해 정리 전용 모드로 돌리는 방식에 맡긴다.
 /// --demo에서는 승격하지 않고 가짜 백엔드로 모의 실행한다.
 /// </summary>
 public partial class ResetWindow : Window
@@ -277,17 +277,12 @@ public partial class ResetWindow : Window
 
         if (!_demo)
         {
-            // 단일 exe로 게시한 빌드에서만 정리를 실행한다(개발 빌드는 exe 옆의 DLL을 읽는다)
-            if (!PublishedBuild.IsSingleFile)
-            {
-                ShowStatus("reset.needsPublishedBuild");
-                return;
-            }
             var (confirmRecords, confirmNumbers) = ResetPlanner.Summarize(selected);
-            var ask = MessageBox.Show(this,
+            // 처음 포커스와 Enter는 "아니오"에 둔다(되돌릴 수 없는 작업이므로 안전한 쪽이 기본)
+            var ask = ThemedDialog.Ask(this,
                 string.Format(CultureInfo.CurrentCulture, Strings.Get("reset.confirm", Lang), confirmRecords, confirmNumbers),
-                Strings.Get("reset.title", Lang), MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (ask != MessageBoxResult.Yes) return;
+                Strings.Get("reset.title", Lang), Lang, defaultNo: true);
+            if (!ask) return;
         }
 
         var plan = new ResetPlan(
@@ -344,12 +339,6 @@ public partial class ResetWindow : Window
         var outcome = await Task.Run(() => new ResetLauncher(new ShellProcessStarter()).Run(planPath, resultPath, itemCount));
         try { File.Delete(planPath); } catch (Exception) { }
 
-        if (outcome == LaunchOutcome.BootstrapFailed)
-        {
-            ShowStatus("reset.bootstrapFailed");
-            RetryButton.Visibility = Visibility.Visible;
-            return;
-        }
         if (outcome == LaunchOutcome.Cancelled)
         {
             ShowStatus("reset.cancelled");
@@ -402,14 +391,4 @@ public partial class ResetWindow : Window
             ShowStatus("reset.resultTitle");
         }
     }
-}
-
-/// <summary>단일 파일로 게시된 빌드인지. 단일 파일에서는 진입 어셈블리의 Location이 비어 있다.</summary>
-internal static class PublishedBuild
-{
-    // IL3000은 단일 파일에서 Location이 비는 것을 경고하는 규칙이다. 여기서는 그 성질로 단일 파일을 판별한다
-#pragma warning disable IL3000
-    public static bool IsSingleFile
-        => string.IsNullOrEmpty(System.Reflection.Assembly.GetEntryAssembly()?.Location);
-#pragma warning restore IL3000
 }

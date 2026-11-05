@@ -78,7 +78,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged, IDisposable
         var current = _vm.Data.Settings.HighlightMinutes;
         if (int.TryParse(text?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var n))
         {
-            current = Math.Clamp(n, MinHighlight, MaxHighlight);
+            current = Num.Clamp(n, MinHighlight, MaxHighlight);
             _vm.SetHighlightMinutes(current);
         }
         HighlightText = current.ToString(CultureInfo.InvariantCulture);

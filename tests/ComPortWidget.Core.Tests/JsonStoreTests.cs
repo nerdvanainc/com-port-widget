@@ -182,4 +182,24 @@ public class JsonStoreTests : IDisposable
         Assert.True(store.Save(b));
         Assert.Equal("둘", store.Load().Memos["k"]);
     }
+
+    [Fact]
+    public void Save_succeeds_when_another_program_releases_the_target_within_the_retry_window()
+    {
+        var store = new JsonStore(FilePath);
+        var first = new AppData();
+        first.Memos["k"] = "처음";
+        Assert.True(store.Save(first));
+
+        var second = new AppData();
+        second.Memos["k"] = "나중";
+        var hold = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.None);
+        var releaser = new Thread(() => { Thread.Sleep(150); hold.Dispose(); });
+        releaser.Start();
+        try { Assert.True(store.Save(second)); }
+        finally { releaser.Join(); hold.Dispose(); }
+
+        Assert.Equal("나중", new JsonStore(FilePath).Load().Memos["k"]);
+        Assert.Equal(new[] { FilePath }, Directory.GetFiles(_dir));
+    }
 }

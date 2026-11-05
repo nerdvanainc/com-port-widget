@@ -96,7 +96,7 @@ public static class ResetPlanner
         if (portName is null || portName.Length < 4
             || !portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
             return null;
-        var digits = portName.AsSpan(3);
+        var digits = portName.Substring(3);
         foreach (var ch in digits)
             if (ch is < '0' or > '9') return null;
         return int.TryParse(digits, System.Globalization.NumberStyles.None,

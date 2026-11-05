@@ -26,34 +26,28 @@ The cleanup is built so that it does not touch connected devices. Just before ru
 
 1. If the same device is plugged in between the last presence check and the `pnputil` call (not measured; a short time, roughly a second or less), its record can be removed. Do not plug or unplug devices while the cleanup runs.
 2. The plan file (`reset-plan.json`) and the result file (`reset-result.json`) sit in a folder the user can write to (`%APPDATA%\ComPortWidget`). The elevated side checks the file names, that both are in the same folder, and that no path component is a link (reparse point). It cannot prevent a file or the folder itself being swapped after those checks (for example, the folder replaced by a link); that is part of the remaining race. A process that is already running as your user could replace a file when you approve the UAC prompt. The elevated side validates the plan contents again, so it cannot remove a connected device or a record outside the Ports class, but it could be made to remove a disconnected record you did not select, or to release reserved numbers. The result and backup files are written to the same folder, so they can be swapped or pre-created in the same way (false content in the result file, or interference with the backup write).
-3. Elevation goes through Windows PowerShell (`powershell.exe`, 5.1). That PowerShell honours user-level .NET profiler settings in environment variables (`COR_PROFILER` and similar). A malicious process already running as your user could plant such a setting and get code running inside the elevated PowerShell. The app can only clean the environment of the child process that PowerShell starts.
-4. If the power goes out before the cleanup finishes, or the folder cannot be deleted, a folder `C:\Program Files\ComPortWidget-Cleanup-<GUID>` can be left behind. The app does not report this. You can delete it by hand.
+3. A .NET Framework program reads `ComPortWidget.exe.config` from the folder of the exe when it starts, and that file can name code to run inside the program (for example through `appDomainManagerAssembly`). Environment variables such as `APPDOMAIN_MANAGER_ASM`, and profiler settings such as `COR_PROFILER`, have the same effect. So a file placed next to the exe, or an environment variable set by a process already running as your user, can run code inside this program, including in the cleanup step after you approve UAC. The program cannot prevent this. A single `.config` file next to the exe is enough to run code, and the Mark of the Web that Windows puts on downloaded files does not stop it. So do not run the exe from Downloads, a shared folder or a synced folder (OneDrive, Nextcloud and similar), and keep it in a folder of its own with no other files. On a PC where you use the cleanup, putting the exe in a folder that only administrators can write to, such as under `C:\Program Files`, closes the file-based paths (the environment-variable paths remain). System DLLs are restricted to System32, but the paths above are separate from that.
+4. The executable is not signed, so the UAC prompt reports an unknown publisher. If the exe has been replaced before you approve, the prompt alone does not show it.
 
 If the PC is already infected, the limits above are a reason not to use this feature.
 
 ## Network and data
 
-- The program does not use the network. There is no telemetry, update check or error reporting, and the app's own code makes no network calls. (The .NET runtime bundled in the exe includes libraries such as `System.Net`, which the app does not use.) If the program crashes, Windows Error Reporting may send a report to Microsoft depending on your Windows settings, and the .NET runtime adds information to that report. This is a Windows feature, not part of the app.
+- The program does not use the network. There is no telemetry, update check or error reporting, and the app's own code makes no network calls. If the program crashes, Windows Error Reporting may send a report to Microsoft depending on your Windows settings. This is a Windows feature, not part of the app.
 - Notes, observed connect and disconnect times, and settings are stored only in `%APPDATA%\ComPortWidget\data.json`. Nothing is synchronised to another PC. On an unhandled error the exception text is appended to `crash.log` in the same folder; it is never sent anywhere.
 - If you turn on starting with Windows, one value is written under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 - The program never opens a COM port. Device information is read from the registry and the device management APIs.
 
 ## Unsigned executable
 
-The executable is not code-signed. SmartScreen may warn on the first run, and the UAC prompt of the cleanup shows "Windows PowerShell" instead of the app name. To check that your download is intact, compare it with `SHA256SUMS.txt` from the release.
+The executable is not code-signed. SmartScreen may warn on the first run, and the UAC prompt of the cleanup shows "Unknown publisher". To check that your download is intact, compare it with `SHA256SUMS.txt` from the release.
 
 ## Names and trademarks
 
 This software is not affiliated with, sponsored by or endorsed by the companies or products below. The names appear only to describe devices. The vendor name in the list is the chip maker that corresponds to the VID (vendor number) the USB device reports. It can differ from the company that built the device.
 
-FTDI is a trademark of Future Technology Devices International Ltd. Silicon Labs is a trademark of Silicon Laboratories Inc. Espressif is a trademark of Espressif Systems. WCH is a trademark of Nanjing Qinheng Microelectronics Co., Ltd. Adafruit is a trademark of Adafruit Industries. STMicroelectronics is a trademark of STMicroelectronics. Prolific is a trademark of Prolific Technology Inc. Arduino is a trademark of Arduino S.r.l. SEGGER is a trademark of SEGGER Microcontroller GmbH. Arm is a trademark of Arm Limited. Microsoft, Windows and PowerShell are trademarks of Microsoft Corporation. Other names are trademarks of their owners.
-
-## Microsoft components in the executable
-
-The source code of this program is under the MIT license. `ComPortWidget.exe` in the release zip also contains the .NET runtime, and parts of it are under the Microsoft .NET Library License and the Windows SDK License, not MIT. The split by file is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-By using or redistributing this executable, you agree to those terms for those components. You may not distribute them separately from the program or reverse engineer them.
+FTDI is a trademark of Future Technology Devices International Ltd. Silicon Labs is a trademark of Silicon Laboratories Inc. Espressif is a trademark of Espressif Systems. WCH is a trademark of Nanjing Qinheng Microelectronics Co., Ltd. Adafruit is a trademark of Adafruit Industries. STMicroelectronics is a trademark of STMicroelectronics. Prolific is a trademark of Prolific Technology Inc. Arduino is a trademark of Arduino S.r.l. SEGGER is a trademark of SEGGER Microcontroller GmbH. Arm is a trademark of Arm Limited. Microsoft, Windows and .NET Framework are trademarks of Microsoft Corporation. Other names are trademarks of their owners.
 
 ## Third-party components
 
-The components included in the executable are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The executable contains no third-party code. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

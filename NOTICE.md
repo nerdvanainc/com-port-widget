@@ -26,34 +26,28 @@
 
 1. 마지막 연결 확인과 `pnputil` 호출 사이(측정하지 않았지만 1초 안팎의 짧은 시간)에 같은 장치가 꽂히면 그 기록이 지워질 수 있습니다. 정리하는 동안에는 장비를 꽂거나 뽑지 마십시오.
 2. 정리 계획 파일(`reset-plan.json`)과 결과 파일(`reset-result.json`)은 사용자가 쓸 수 있는 폴더(`%APPDATA%\ComPortWidget`)에 놓입니다. 관리자 권한 쪽은 파일 이름, 같은 폴더 여부, 경로에 링크(재분석 지점)가 있는지를 검사하지만, 검사한 뒤 파일이나 폴더를 바꿔치기하는 것(예: 폴더를 링크로 교체)까지는 막지 못하고, 이것도 남아 있는 경쟁의 일부입니다. 이미 사용자 권한으로 실행 중인 다른 프로세스가 UAC 승인 시점에 맞춰 파일을 바꿀 수 있습니다. 계획 내용은 승격된 쪽에서 다시 검증하므로 연결된 장치나 Ports 클래스 밖의 기록은 지울 수 없지만, 사용자가 고르지 않은 미연결 기록을 지우게 하거나, 예약만 남은 번호를 해제하게 할 수 있습니다. 결과 파일과 백업 파일도 같은 폴더에 쓰이므로 같은 방식으로 바꿔치기하거나 선점할 수 있습니다(결과 파일에 거짓 내용을 쓰거나 백업 파일 쓰기를 방해하는 경우).
-3. 승격은 Windows PowerShell(`powershell.exe`, 5.1)이 맡습니다. 이 PowerShell은 사용자 수준 환경 변수에 지정된 .NET 프로파일러 설정(`COR_PROFILER` 등)을 따릅니다. 이미 사용자 권한으로 실행 중인 악성 프로세스가 그 설정을 심어 두었다면 승격된 PowerShell에서 코드가 실행될 수 있습니다. 앱은 PowerShell이 띄우는 자식 프로세스의 환경 변수만 정리할 수 있습니다.
-4. 정리가 끝나기 전에 전원이 꺼지거나 폴더를 지우지 못하면 `C:\Program Files\ComPortWidget-Cleanup-<GUID>` 폴더가 남을 수 있습니다. 앱은 이를 알려 주지 않습니다. 남아 있으면 직접 지워도 됩니다.
+3. .NET Framework 프로그램은 시작할 때 exe와 같은 폴더의 `ComPortWidget.exe.config` 파일을 읽고, 이 파일로 프로그램 안에서 실행할 코드(예: `appDomainManagerAssembly`)를 지정할 수 있습니다. `APPDOMAIN_MANAGER_ASM` 같은 환경 변수와 `COR_PROFILER` 같은 프로파일러 설정도 같은 효과가 있습니다. 따라서 exe 옆에 놓인 파일이나, 이미 사용자 권한으로 실행 중인 프로세스가 지정한 환경 변수로 이 프로그램 안에서 코드가 실행될 수 있고, UAC 승인 뒤의 정리 단계도 포함됩니다. 이 프로그램은 이를 막지 못합니다. `.config` 파일 하나만 exe 옆에 있어도 코드가 실행되며, 인터넷에서 받은 파일에 붙는 Mark of the Web(출처 표시)이 이를 막지 않습니다. 따라서 다운로드 폴더, 공유 폴더, 동기화되는 폴더(OneDrive, Nextcloud 등)에서 실행하지 말고, exe는 다른 파일이 없는 자기 폴더에 두십시오. 정리 기능을 쓰는 PC에서는 `C:\Program Files` 아래처럼 관리자만 쓸 수 있는 폴더에 exe를 두면 파일을 이용하는 경로가 막힙니다(환경 변수를 이용하는 경로는 남습니다). 시스템 DLL은 System32에서만 읽도록 제한했지만, 위 경로는 별개입니다.
+4. 실행 파일에 서명이 없으므로 UAC 창은 게시자를 확인할 수 없다고 표시합니다. 승인 전에 exe가 바뀌어 있어도 UAC 창만으로는 구별할 수 없습니다.
 
 PC가 이미 악성코드에 감염되어 있다면, 위 한계 때문에 이 기능을 쓰지 않는 편이 안전합니다.
 
 ## 네트워크와 데이터
 
-- 이 프로그램은 네트워크를 쓰지 않습니다. 텔레메트리, 업데이트 확인, 오류 보고가 없고, 이 앱의 코드는 네트워크 호출을 하지 않습니다. (.NET 런타임에는 `System.Net` 같은 네트워크 라이브러리가 들어 있지만 앱이 사용하지 않습니다.) 다만 프로그램이 비정상 종료하면 Windows 오류 보고가 설정에 따라 Microsoft로 보고서를 보낼 수 있고, .NET 런타임이 그 보고서에 정보를 추가합니다. 이것은 앱이 아니라 Windows의 기능입니다.
+- 이 프로그램은 네트워크를 쓰지 않습니다. 텔레메트리, 업데이트 확인, 오류 보고가 없고, 이 앱의 코드는 네트워크 호출을 하지 않습니다. 다만 프로그램이 비정상 종료하면 Windows 오류 보고가 설정에 따라 Microsoft로 보고서를 보낼 수 있습니다. 이것은 앱이 아니라 Windows의 기능입니다.
 - 메모, 직접 관측한 연결·해제 시각, 설정은 `%APPDATA%\ComPortWidget\data.json`에만 저장됩니다. 다른 PC로 동기화되지 않습니다. 처리되지 않은 오류가 나면 예외 내용을 같은 폴더의 `crash.log`에 덧붙이며, 어디에도 보내지 않습니다.
 - Windows 시작 시 자동 실행을 켜면 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`에 값을 하나 씁니다.
 - COM 포트를 열지 않습니다. 장치 정보는 레지스트리와 장치 관리 API에서 읽습니다.
 
 ## 서명되지 않은 실행 파일
 
-실행 파일에는 코드 서명이 없습니다. 처음 실행할 때 SmartScreen 경고가 뜰 수 있고, 정리 기능의 UAC 창에는 앱 이름 대신 "Windows PowerShell"이 표시됩니다. 받은 파일이 맞는지는 릴리스의 `SHA256SUMS.txt`와 비교해 확인하십시오.
+실행 파일에는 코드 서명이 없습니다. 처음 실행할 때 SmartScreen 경고가 뜰 수 있고, 정리 기능의 UAC 창에는 "확인할 수 없는 게시자"가 표시됩니다. 받은 파일이 맞는지는 릴리스의 `SHA256SUMS.txt`와 비교해 확인하십시오.
 
 ## 제품명과 상표
 
 이 소프트웨어는 아래 회사나 제품과 제휴, 후원, 보증 관계가 없습니다. 이름은 장치를 설명하는 용도로만 나옵니다. 목록에 나오는 제조사 이름은 USB 장치가 알리는 VID(제조사 번호)에 대응하는 칩 제조사이며, 장비를 실제로 만든 회사와 다를 수 있습니다.
 
-FTDI는 Future Technology Devices International Ltd.의 상표입니다. Silicon Labs는 Silicon Laboratories Inc.의 상표입니다. Espressif는 Espressif Systems의 상표입니다. WCH는 Nanjing Qinheng Microelectronics Co., Ltd.의 상표입니다. Adafruit는 Adafruit Industries의 상표입니다. STMicroelectronics는 STMicroelectronics의 상표입니다. Prolific은 Prolific Technology Inc.의 상표입니다. Arduino는 Arduino S.r.l.의 상표입니다. SEGGER는 SEGGER Microcontroller GmbH의 상표입니다. Arm은 Arm Limited의 상표입니다. Microsoft, Windows, PowerShell은 Microsoft Corporation의 상표입니다. 그 밖의 이름은 각 소유자의 상표입니다.
-
-## 실행 파일에 포함된 Microsoft 구성 요소
-
-이 프로그램의 소스 코드는 MIT 라이선스입니다. 릴리스 zip의 `ComPortWidget.exe`에는 .NET 런타임이 함께 들어 있고, 그중 일부는 MIT가 아니라 Microsoft .NET Library License와 Windows SDK License를 따릅니다. 파일별 구분은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있습니다.
-
-이 실행 파일을 사용하거나 다시 배포하면 해당 구성 요소에 대해 위 약관을 따르는 데 동의하는 것입니다. 이 구성 요소를 프로그램과 분리해 따로 배포할 수 없고, 역설계할 수 없습니다.
+FTDI는 Future Technology Devices International Ltd.의 상표입니다. Silicon Labs는 Silicon Laboratories Inc.의 상표입니다. Espressif는 Espressif Systems의 상표입니다. WCH는 Nanjing Qinheng Microelectronics Co., Ltd.의 상표입니다. Adafruit는 Adafruit Industries의 상표입니다. STMicroelectronics는 STMicroelectronics의 상표입니다. Prolific은 Prolific Technology Inc.의 상표입니다. Arduino는 Arduino S.r.l.의 상표입니다. SEGGER는 SEGGER Microcontroller GmbH의 상표입니다. Arm은 Arm Limited의 상표입니다. Microsoft, Windows, .NET Framework는 Microsoft Corporation의 상표입니다. 그 밖의 이름은 각 소유자의 상표입니다.
 
 ## 서드파티 구성 요소
 
-실행 파일에 포함된 구성 요소는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 정리했습니다.
+실행 파일에는 서드파티 코드가 들어 있지 않습니다. 자세한 내용은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있습니다.

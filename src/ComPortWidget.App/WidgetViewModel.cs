@@ -400,7 +400,7 @@ public sealed class WidgetViewModel : INotifyPropertyChanged
     /// <summary>창 위치와 크기를 저장한다. 유한한 값일 때만 기록한다(NaN은 저장 전체를 실패시킨다).</summary>
     public void SaveBounds(double left, double top, double width, double height)
     {
-        if (!double.IsFinite(left) || !double.IsFinite(top) || !double.IsFinite(width) || !double.IsFinite(height))
+        if (!Num.IsFinite(left) || !Num.IsFinite(top) || !Num.IsFinite(width) || !Num.IsFinite(height))
             return;
         var s = Data.Settings;
         if (s.Left == left && s.Top == top && s.Width == width && s.Height == height) return;

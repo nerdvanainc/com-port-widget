@@ -1,7 +1,5 @@
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using ComPortWidget.Core.Reset;
+using ComPortWidget.Core.Storage;
 
 namespace ComPortWidget.Platform;
 
@@ -22,39 +20,36 @@ public sealed class ResetResultFile
 /// <summary>계획 파일과 결과 파일의 읽기/쓰기. 계획 파일은 일반 권한으로 쓸 수 있으므로 형식을 엄격히 검사한다.</summary>
 public static class ResetFiles
 {
-    private static readonly JsonSerializerOptions Options = new()
-    {
-        WriteIndented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     public static void WritePlan(string path, ResetPlan plan)
-        => WriteAtomic(path, JsonSerializer.SerializeToUtf8Bytes(
-            new { plan.InstanceIds, plan.ReservedOnlyPorts }, Options));
+        => WriteAtomic(path, MiniJson.ToUtf8(new Dictionary<string, object?>
+        {
+            ["InstanceIds"] = plan.InstanceIds.ToList(),
+            ["ReservedOnlyPorts"] = plan.ReservedOnlyPorts.ToList(),
+        }));
 
     /// <summary>계획을 읽는다. 파일이 없거나 형식이 다르거나 필드가 빠졌으면 예외를 던진다.</summary>
     public static ResetPlan ReadPlan(string path)
     {
-        using var doc = JsonDocument.Parse(File.ReadAllBytes(path));
-        var root = doc.RootElement;
-        if (root.ValueKind != JsonValueKind.Object) throw new InvalidDataException("Plan is not an object.");
-        if (!root.TryGetProperty("InstanceIds", out var ids) || ids.ValueKind != JsonValueKind.Array)
+        object? parsed;
+        try { parsed = MiniJson.Parse(File.ReadAllBytes(path)); }
+        catch (JsonFormatException e) { throw new InvalidDataException(e.Message, e); }
+        if (parsed is not Dictionary<string, object?> root) throw new InvalidDataException("Plan is not an object.");
+        if (!root.TryGetValue("InstanceIds", out var ids) || ids is not List<object?> idItems)
             throw new InvalidDataException("InstanceIds is missing or not an array.");
-        if (!root.TryGetProperty("ReservedOnlyPorts", out var ports) || ports.ValueKind != JsonValueKind.Array)
+        if (!root.TryGetValue("ReservedOnlyPorts", out var ports) || ports is not List<object?> portItems)
             throw new InvalidDataException("ReservedOnlyPorts is missing or not an array.");
 
         var idList = new List<string>();
-        foreach (var e in ids.EnumerateArray())
+        foreach (var e in idItems)
         {
-            if (e.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(e.GetString()))
+            if (e is not string str || string.IsNullOrWhiteSpace(str))
                 throw new InvalidDataException("InstanceIds has an invalid entry.");
-            idList.Add(e.GetString()!);
+            idList.Add(str);
         }
         var portList = new List<int>();
-        foreach (var e in ports.EnumerateArray())
+        foreach (var e in portItems)
         {
-            if (e.ValueKind != JsonValueKind.Number || !e.TryGetInt32(out var n) || n <= 0)
+            if (e is not JsonNumber num || !num.TryGetInt32(out var n) || n <= 0)
                 throw new InvalidDataException("ReservedOnlyPorts has an invalid entry.");
             portList.Add(n);
         }
@@ -72,7 +67,21 @@ public static class ResetFiles
             Items = result.Items.ToList(),
             Actions = actions.ToList(),
         };
-        WriteAtomic(path, JsonSerializer.SerializeToUtf8Bytes(file, Options));
+        WriteAtomic(path, MiniJson.ToUtf8(new Dictionary<string, object?>
+        {
+            ["DryRun"] = file.DryRun,
+            ["Aborted"] = file.Aborted,
+            ["AbortReason"] = file.AbortReason,
+            ["AbortError"] = file.AbortError,
+            ["Items"] = file.Items.Select(i => (object?)new Dictionary<string, object?>
+            {
+                ["Target"] = i.Target,
+                ["Status"] = i.Status.ToString(),
+                ["Detail"] = i.Detail,
+                ["Error"] = i.Error,
+            }).ToList(),
+            ["Actions"] = file.Actions,
+        }));
     }
 
     /// <summary>결과 파일을 읽는다. 없거나 읽을 수 없거나 형식이 틀리면 null.</summary>
@@ -81,12 +90,31 @@ public static class ResetFiles
         try
         {
             if (!File.Exists(path)) return null;
-            var file = JsonSerializer.Deserialize<ResetResultFile>(File.ReadAllBytes(path), Options);
-            if (file is null || file.Items is null || file.Actions is null) return null;
-            if (file.Items.Any(i => i is null || string.IsNullOrEmpty(i.Target))) return null;
+            var root = MiniJson.AsObject(MiniJson.Parse(File.ReadAllBytes(path)));
+            var file = new ResetResultFile
+            {
+                DryRun = MiniJson.OptBool(root, "DryRun", false),
+                Aborted = MiniJson.OptBool(root, "Aborted", false),
+                AbortReason = MiniJson.OptString(root, "AbortReason"),
+                AbortError = MiniJson.OptString(root, "AbortError"),
+            };
+            if (root.TryGetValue("Items", out var items) && items is not null)
+                foreach (var it in MiniJson.AsArray(items))
+                {
+                    if (it is null) return null;
+                    var o = MiniJson.AsObject(it);
+                    var target = MiniJson.OptString(o, "Target");
+                    var status = MiniJson.OptString(o, "Status");
+                    if (string.IsNullOrEmpty(target) || status is null
+                        || !Enum.TryParse<ResetItemStatus>(status, true, out var st) || !Enum.IsDefined(typeof(ResetItemStatus), st)) return null;
+                    file.Items.Add(new ResetItemResult(target!, st, MiniJson.OptString(o, "Detail"), MiniJson.OptString(o, "Error")));
+                }
+            if (root.TryGetValue("Actions", out var actions) && actions is not null)
+                foreach (var a in MiniJson.AsArray(actions))
+                    file.Actions.Add(a as string ?? throw new JsonFormatException("Action is not a string."));
             return file;
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonFormatException)
         {
             return null;
         }
@@ -101,7 +129,7 @@ public static class ResetFiles
         try
         {
             File.WriteAllBytes(temp, bytes);
-            File.Move(temp, path, overwrite: true);
+            FileUtil.ReplaceAtomic(temp, path);
         }
         catch
         {

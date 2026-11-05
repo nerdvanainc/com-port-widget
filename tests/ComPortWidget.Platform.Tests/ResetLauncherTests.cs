@@ -59,16 +59,18 @@ public class ResetLauncherTests : IDisposable
     {
         var result = P("result.json");
         var starter = new FakeStarter((_, _) => { WriteGoodResult(result); return 0; });
-        Assert.Equal(LaunchOutcome.Completed, new ResetLauncher(starter, null, _ => new string('A', 64)).Run(P("plan.json"), result));
-        // exe를 직접 승격하지 않고 System32의 PowerShell을 승격한다
-        Assert.Equal(ResetLauncher.PowerShellPath, starter.Calls[0].Exe);
-        Assert.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.System), starter.Calls[0].Exe, StringComparison.OrdinalIgnoreCase);
-        var args = starter.Calls[0].Args;
-        Assert.Equal(new[] { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand" }, args.Take(5));
-        var script = System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(args[5]));
-        Assert.Contains(P("plan.json"), script);
-        Assert.Contains(result, script);
-        Assert.Contains(new string('A', 64), script); // 주입한 해시
+        Assert.Equal(LaunchOutcome.Completed, new ResetLauncher(starter, @"C:\app\ComPortWidget.exe").Run(P("plan.json"), result));
+        // exe를 직접 승격한다. 인자는 계획 파일과 결과 파일뿐이다
+        Assert.Equal(@"C:\app\ComPortWidget.exe", starter.Calls[0].Exe);
+        Assert.Equal(new[] { "--reset-plan", P("plan.json"), "--reset-result", result }, starter.Calls[0].Args);
+    }
+
+    [Fact]
+    public void Launcher_passes_dry_run_flag()
+    {
+        var starter = new FakeStarter((_, _) => 0);
+        new ResetLauncher(starter, @"C:\app\ComPortWidget.exe").Run(P("plan.json"), P("result.json"), 0, dryRun: true);
+        Assert.Equal(new[] { "--reset-plan", P("plan.json"), "--reset-result", P("result.json"), "--dry-run" }, starter.Calls[0].Args);
     }
 
     [Fact]
@@ -116,28 +118,9 @@ public class ResetLauncherTests : IDisposable
     }
 
     [Fact]
-    public void Launcher_reports_failed_when_the_exe_cannot_be_hashed()
-    {
-        var starter = new FakeStarter((_, _) => 0);
-        var launcher = new ResetLauncher(starter, null, _ => throw new IOException("locked"));
-        Assert.Equal(LaunchOutcome.Failed, launcher.Run(P("plan.json"), P("result.json")));
-        Assert.Empty(starter.Calls);
-    }
-
-    [Fact]
     public void Launcher_reports_failed_on_timeout()
     {
         var starter = new FakeStarter((_, _) => throw new TimeoutException());
         Assert.Equal(LaunchOutcome.Failed, new ResetLauncher(starter).Run(P("plan.json"), P("result.json"), 1));
-    }
-
-    [Theory]
-    [InlineData(10)]
-    [InlineData(11)]
-    [InlineData(12)]
-    public void Launcher_reports_bootstrap_failed_for_preparation_exit_codes(int code)
-    {
-        var starter = new FakeStarter((_, _) => code);
-        Assert.Equal(LaunchOutcome.BootstrapFailed, new ResetLauncher(starter).Run(P("plan.json"), P("result.json")));
     }
 }

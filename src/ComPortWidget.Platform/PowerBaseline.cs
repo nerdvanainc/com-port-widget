@@ -9,7 +9,7 @@ public static class PowerBaseline
     private static readonly TimeSpan LookBack = TimeSpan.FromDays(14);
 
     public static DateTimeOffset GetBootTime() =>
-        DateTimeOffset.Now - TimeSpan.FromMilliseconds(Environment.TickCount64);
+        DateTimeOffset.Now - TimeSpan.FromMilliseconds(Compat.TickCount64);
 
     /// <summary>
     /// System 로그에서 Power-Troubleshooter ID 1(절전 복귀)과 Kernel-Boot ID 27(BootType 1 = 빠른 시작, 2 = 최대 절전 복귀)의

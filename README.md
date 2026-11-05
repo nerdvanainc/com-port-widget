@@ -28,13 +28,12 @@ COM 포트를 열지 않으므로 터미널 프로그램, 플래셔, 디버거�
 
 ## 요구 사항
 
-- Windows 10 이상, 64비트(x64). 목록과 메모 기능에는 이 제한이 없습니다.
+- Windows 10 버전 1903 이상, 64비트. .NET Framework 4.8은 이 버전부터 Windows에 들어 있어서 따로 설치할 것이 없습니다.
 - COM 포트 정리 기능은 Windows 10 버전 2004 이상이 필요합니다. 장치 기록 삭제에 쓰는 `pnputil /remove-device`가 그 버전부터 있습니다.
-- .NET을 따로 설치할 필요가 없습니다. 런타임이 exe에 들어 있습니다.
 
 ## 다운로드와 실행
 
-[Releases 페이지](https://github.com/nerdvanainc/com-port-widget/releases)에서 `ComPortWidget-<버전>-win64.zip`과 `SHA256SUMS.txt`를 받습니다. 압축을 풀면 `ComPortWidget.exe`, `LICENSE`, `NOTICE.md`, `NOTICE.en.md`, `THIRD_PARTY_NOTICES.md`가 나옵니다.
+[Releases 페이지](https://github.com/nerdvanainc/com-port-widget/releases)에서 `ComPortWidget-<버전>-win64.zip`과 `SHA256SUMS.txt`를 받습니다. 압축 파일 안에는 `ComPortWidget-<버전>` 폴더가 있고, 그 안에 `ComPortWidget.exe`, `LICENSE`, `NOTICE.md`, `NOTICE.en.md`, `THIRD_PARTY_NOTICES.md`가 들어 있습니다.
 
 받은 파일이 맞는지 확인합니다.
 
@@ -44,7 +43,7 @@ Get-FileHash ComPortWidget-0.1.0-win64.zip -Algorithm SHA256
 
 출력된 값이 `SHA256SUMS.txt`에 적힌 값과 같아야 합니다.
 
-`ComPortWidget.exe`를 실행하면 끝입니다. 설치 프로그램은 없습니다. 크기는 0.1.0 기준 약 72 MiB(75.5 MB)입니다. 런타임을 압축해 넣었기 때문에 같은 구성의 비압축 빌드(173 MB)보다 작고, 대신 시작이 조금 느립니다. 개발 PC(Windows 11)에서 실행 후 창이 뜨기까지 압축 빌드는 1.2~1.7초, 비압축 빌드는 0.9~1.6초가 걸렸습니다.
+압축을 푼 폴더에서 `ComPortWidget.exe`를 실행하면 끝입니다. 설치 프로그램은 없습니다. 0.1.0 기준으로 exe는 약 210 KiB, zip은 약 98 KiB입니다. 압축은 다운로드 폴더, 공유 폴더, 동기화되는 폴더에 풀지 말고 이 프로그램만 들어 있는 폴더에 푸십시오. exe 옆에 `.config` 파일 같은 다른 파일이 있으면 프로그램이 그 내용대로 코드를 실행할 수 있습니다. 정리 기능을 쓰는 PC에서는 `C:\Program Files` 아래처럼 관리자만 쓸 수 있는 폴더에 두면 더 안전합니다(자세한 내용은 [NOTICE.md](NOTICE.md)).
 
 ### 처음 실행할 때 SmartScreen 경고
 
@@ -107,18 +106,11 @@ Get-FileHash ComPortWidget-0.1.0-win64.zip -Algorithm SHA256
 
 기본으로 선택되는 것은 미연결 USB 시리얼 기록뿐입니다. 나머지는 직접 선택해야 합니다. 실행 전에 지워질 항목, 메모, 마지막 인식 시간, 예상 결과("기록 N개 삭제, 번호 M개 해제")가 나오고, 한 번 더 확인합니다.
 
-### 정리할 때 UAC에 Windows PowerShell이 표시됩니다
+### 정리할 때 UAC에 "확인할 수 없는 게시자"가 표시됩니다
 
-장치 기록 삭제에는 관리자 권한이 필요합니다. 위젯 본체는 일반 권한으로 돌고, 정리를 실행할 때만 승격합니다. 승격은 다음 순서로 진행됩니다.
+장치 기록 삭제에는 관리자 권한이 필요합니다. 위젯 본체는 일반 권한으로 돌고, 정리를 실행할 때만 같은 `ComPortWidget.exe`를 정리 전용 모드로 다시 실행하면서 UAC로 승격합니다. exe에 코드 서명이 없으므로 UAC 창에는 `ComPortWidget.exe`가 "확인할 수 없는 게시자"로 표시됩니다. 서명이 없는 프로그램은 항상 이렇게 나옵니다.
 
-1. 위젯이 시스템 폴더의 Windows PowerShell(`powershell.exe`)을 UAC로 승격해 실행합니다.
-2. 그 PowerShell이 `C:\Program Files\ComPortWidget-Cleanup-<GUID>` 폴더를 만들고 실행 중인 exe를 복사합니다. 복사본의 해시가 원본과 같은지 확인합니다.
-3. 복사본을 정리 전용 모드로 실행합니다. 일반 사용자가 쓸 수 없는 위치에서 실행하므로, 같은 폴더에 심어 둔 DLL이 관리자 권한으로 로드되는 일을 막습니다.
-4. 끝나면 임시 폴더를 지웁니다.
-
-그래서 UAC 창에는 앱 이름이 아니라 "Windows PowerShell"이 표시됩니다. exe는 서명이 없어서 exe를 직접 승격하면 "알 수 없는 게시자"로 나오지만, 이 방식에서는 승격되는 것이 Windows 자체의 PowerShell입니다. 정리하는 동안 Program Files에 위 임시 폴더가 잠깐 보이고, 끝나면 사라집니다.
-
-개발용 빌드(`dotnet run`)에서는 정리가 실행되지 않습니다. 단일 파일로 게시한 exe에서만 실행됩니다.
+정리 전용 모드는 창을 만들지 않고, 계획 파일을 다시 검증한 뒤 선택한 항목만 처리합니다. 시스템 DLL은 System32에서만 읽도록 제한해 두었습니다.
 
 남아 있는 한계는 [NOTICE.md](NOTICE.md)에 적었습니다.
 
@@ -128,7 +120,7 @@ Get-FileHash ComPortWidget-0.1.0-win64.zip -Algorithm SHA256
 
 ## 소스에서 빌드
 
-.NET 10 SDK가 필요합니다(`global.json` 참조).
+.NET SDK(`global.json` 참조)와 .NET Framework 4.8 개발자 팩이 필요합니다. 앱은 .NET Framework 4.8 대상이고, Core와 Platform의 소스를 앱 프로젝트가 직접 포함해서 exe 하나로 빌드됩니다.
 
 ```powershell
 dotnet build ComPortWidget.sln -c Release
@@ -136,11 +128,11 @@ dotnet test ComPortWidget.sln -c Release
 pwsh packaging/make_release.ps1 -Version 0.1.0   # dist/ 아래에 zip과 SHA256SUMS.txt 생성
 ```
 
-단위 테스트는 xUnit이며 장비 식별 규칙, 목록 정렬과 하이라이트, 저장, 정리 계획과 안전장치, 승격 스크립트를 다룹니다. 실제 장치 기록을 지우는 동작은 자동 테스트에 포함되지 않습니다.
+단위 테스트는 xUnit이며 장비 식별 규칙, 목록 정렬과 하이라이트, 저장 파일 형식, 정리 계획과 안전장치, 실행 인자 처리를 다룹니다. 실제 장치 기록을 지우는 동작은 자동 테스트에 포함되지 않습니다.
 
 ## 라이선스
 
-소스 코드는 MIT입니다. [LICENSE](LICENSE) 참조. 릴리스 exe에 포함된 .NET 런타임 일부는 Microsoft 약관을 따르며, 파일별 구분은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있습니다. 변경 내역은 [CHANGELOG.md](CHANGELOG.md)에 있습니다.
+소스 코드는 MIT입니다. [LICENSE](LICENSE) 참조. 릴리스 exe에는 서드파티 코드가 들어 있지 않습니다([THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). 변경 내역은 [CHANGELOG.md](CHANGELOG.md)에 있습니다.
 
 ## 회사 소개
 

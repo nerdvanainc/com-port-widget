@@ -49,7 +49,7 @@ public static class HotkeyParser
             if (c is >= 'A' and <= 'Z' or >= '0' and <= '9') return c;
             return 0;
         }
-        if ((part[0] is 'F' or 'f') && int.TryParse(part.AsSpan(1), System.Globalization.NumberStyles.None,
+        if ((part[0] is 'F' or 'f') && int.TryParse(part.Substring(1), System.Globalization.NumberStyles.None,
                 System.Globalization.CultureInfo.InvariantCulture, out var n) && n is >= 1 and <= 24)
             return 0x70u + (uint)(n - 1);
         return 0;
